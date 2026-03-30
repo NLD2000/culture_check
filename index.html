@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultur-Diagnose Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f9; color: #333; padding: 20px; line-height: 1.5; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; margin-bottom: 30px; }
+        h2 { color: #1a73e8; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 40px; }
+        
+        .setup-box { background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #ffeeba; }
+        .setup-box strong { display: block; margin-bottom: 10px; color: #856404; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+
+        .question-block { border-bottom: 1px solid #eee; padding: 25px 0; }
+        .question-text { font-weight: 500; font-size: 1.1em; margin-bottom: 15px; }
+        .scale { display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; }
+        .options { display: flex; gap: 15px; }
+        .option { display: flex; flex-direction: column; align-items: center; font-size: 0.9em; cursor: pointer; }
+        .option input { width: 20px; height: 20px; cursor: pointer; }
+        
+        .reflection-block { margin-top: 25px; }
+        textarea { width: 100%; height: 100px; border-radius: 6px; border: 1px solid #ccc; padding: 12px; font-family: inherit; font-size: 1em; resize: vertical; box-sizing: border-box; }
+
+        #resultArea { display: none; text-align: center; }
+        .chart-container { position: relative; height: 600px; width: 100%; margin: 30px 0; }
+        
+        .analysis-section, .reflection-results { background: #fdfdfd; border: 1px solid #e0e6ed; border-left: 6px solid #1a73e8; padding: 25px; margin-top: 30px; border-radius: 4px; text-align: left; }
+        .result-item { margin-bottom: 20px; }
+        .result-q { font-weight: bold; color: #1557b0; display: block; margin-bottom: 5px; }
+        .result-a { font-style: italic; color: #444; white-space: pre-wrap; }
+
+        .ranking-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 30px; }
+        .ranking-item { padding: 12px; border-radius: 6px; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        
+        button { width: 100%; padding: 18px; background: #1a73e8; color: white; border: none; border-radius: 6px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 30px; }
+        button:hover { background: #1557b0; }
+        .status-msg { margin-top: 10px; color: #28a745; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quizArea">
+        <h1>Organisationskultur-Diagnose</h1>
+
+        <div class="setup-box">
+            <strong>Gruppen-Code (bitte vom Moderator erfragen):</strong>
+            <input type="text" id="groupCode" placeholder="z.B. Flottenseminar-April-2026" required>
+        </div>
+        
+        <h2>Teil 1: Kulturelle Merkmale</h2>
+        <div id="questionsContainer"></div>
+
+        <h2>Teil 2: Persönliche Reflexion</h2>
+        <div class="reflection-block">
+            <div class="question-text">1. Was schätzt du am meisten an unserer aktuellen Kultur?</div>
+            <textarea id="ref1" placeholder="Deine Antwort..."></textarea>
+        </div>
+        <div class="reflection-block">
+            <div class="question-text">2. Welche Verhaltensweisen und Denkweisen sollten wir weiterentwickeln?</div>
+            <textarea id="ref2" placeholder="Deine Antwort..."></textarea>
+        </div>
+        <div class="reflection-block">
+            <div class="question-text">3. Wie effektiv sind unsere Führungskräfte darin, die gewünschte Kultur vorzuleben?</div>
+            <textarea id="ref3" placeholder="Deine Antwort..."></textarea>
+        </div>
+        <div class="reflection-block">
+            <div class="question-text">4. Welche Eigenschaften haben Menschen, die in unserer Kultur am erfolgreichsten sind?</div>
+            <textarea id="ref4" placeholder="Deine Antwort..."></textarea>
+        </div>
+        <div class="reflection-block">
+            <div class="question-text">5. Wenn neue Mitarbeitende in unserer Kultur nicht erfolgreich sind – was ist der häufigste Grund dafür?</div>
+            <textarea id="ref5" placeholder="Deine Antwort..."></textarea>
+        </div>
+
+        <button onclick="processResults()">Diagnose abschließen & Senden</button>
+        <div id="loadingMsg" style="display:none; text-align:center; margin-top:10px; color:#666;">Daten werden übertragen...</div>
+    </div>
+
+    <div id="resultArea">
+        <div id="sentSuccess" class="status-msg">✓ Deine Daten wurden erfolgreich übermittelt!</div>
+        <h1>Dein Kulturelles Profil</h1>
+        <div class="chart-container">
+            <canvas id="chartCanvas"></canvas>
+        </div>
+        
+        <div class="analysis-section">
+            <div id="analysisText"></div>
+        </div>
+
+        <h2>Deine Reflexionen</h2>
+        <div class="reflection-results" id="reflectionDisplay"></div>
+
+        <div id="ranking" class="ranking-list"></div>
+        <button onclick="window.print()" style="background: #2e7d32;">Als PDF speichern</button>
+        <button onclick="location.reload()" style="background: #546e7a; margin-top: 10px;">Neue Umfrage starten</button>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzORGnnRdcCoVnYQqFT4rN0JDT17IOc0bjkCX8ZoIXUF3vtKkqkIZ5fPg1wBOeT2vq9/exec";
+    let myChart = null;
+
+    const questions = [
+        { id: 'c1', style: 'Caring', text: 'Zusammenarbeit und gegenseitiges Vertrauen stehen im Mittelpunkt.' },
+        { id: 'c2', style: 'Caring', text: 'Das Umfeld wird als herzlich, kollaborativ und unterstützend wahrgenommen.' },
+        { id: 'p1', style: 'Purpose', text: 'Die Arbeit ist von Idealismus und langfristiger Sinnstiftung geprägt.' },
+        { id: 'p2', style: 'Purpose', text: 'Wir streben nach Nachhaltigkeit und globalem Wohl.' },
+        { id: 'l1', style: 'Learning', text: 'Kreativität und Neugier sind zentrale Treiber der täglichen Arbeit.' },
+        { id: 'l2', style: 'Learning', text: 'Wir sind offen für Alternativen und feiern Innovationen.' },
+        { id: 'e1', style: 'Enjoyment', text: 'Die Kultur fördert Spaß und ein lockeres Arbeitsklima.' },
+        { id: 'e2', style: 'Enjoyment', text: 'Spontaneität und Humor prägen das Miteinander.' },
+        { id: 'r1', style: 'Results', text: 'Leistung, Zielerreichung und Gewinnen stehen an oberster Stelle.' },
+        { id: 'r2', style: 'Results', text: 'Wir sind auf Spitzenleistungen und Markterfolg fokussiert.' },
+        { id: 'a1', style: 'Authority', text: 'Entschlossenheit und Stärke zeichnen unsere Führung aus.' },
+        { id: 'a2', style: 'Authority', text: 'Wettbewerb und persönlicher Vorteil sind deutlich spürbar.' },
+        { id: 's1', style: 'Safety', text: 'Planung, Vorsicht und Vorbereitung sind tief verankert.' },
+        { id: 's2', style: 'Safety', text: 'Risikobewusstsein wird über Experimentierfreude gestellt.' },
+        { id: 'o1', style: 'Order', text: 'Respekt, Struktur und geteilte Normen bilden das Rückgrat.' },
+        { id: 'o2', style: 'Order', text: 'Prozesse orientieren sich streng an bewährten Regeln.' }
+    ];
+
+    const styleMeta = {
+        'Caring':   { x: 0.8, y: 0.2, color: '#27ae60' },
+        'Purpose':  { x: 0.5, y: 0.8, color: '#2ecc71' },
+        'Learning': { x: -0.5, y: 0.8, color: '#e67e22' },
+        'Enjoyment':{ x: -0.8, y: 0.2, color: '#f1c40f' },
+        'Results':  { x: -0.8, y: -0.2, color: '#e74c3c' },
+        'Authority':{ x: -0.5, y: -0.8, color: '#8e44ad' },
+        'Safety':   { x: 0.5, y: -0.8, color: '#3498db' },
+        'Order':    { x: 0.8, y: -0.2, color: '#7f8c8d' }
+    };
+
+    const qContainer = document.getElementById('questionsContainer');
+    questions.sort(() => Math.random() - 0.5).forEach((q, i) => {
+        qContainer.innerHTML += `
+            <div class="question-block">
+                <div class="question-text">${i+1}. ${q.text}</div>
+                <div class="scale">
+                    <span>Trifft nicht zu</span>
+                    <div class="options">
+                        ${[1,2,3,4,5].map(n => `<label class="option"><input type="radio" name="${q.id}" value="${n}" required> ${n}</label>`).join('')}
+                    </div>
+                    <span>Trifft voll zu</span>
+                </div>
+            </div>`;
+    });
+
+    async function processResults() {
+        const scores = {};
+        const groupCode = document.getElementById('groupCode').value.trim();
+        if(!groupCode) return alert("Bitte gib einen Gruppen-Code ein!");
+
+        let valid = true;
+        questions.forEach(q => {
+            const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+            if(!checked) valid = false; else scores[q.style] = (scores[q.style] || 0) + parseInt(checked.value);
+        });
+        if(!valid) return alert("Bitte beantworte alle Fragen in Teil 1.");
+
+        const reflections = [
+            {q: "Schätzwert Kultur", a: document.getElementById('ref1').value},
+            {q: "Entwicklung", a: document.getElementById('ref2').value},
+            {q: "Führung", a: document.getElementById('ref3').value},
+            {q: "Erfolgsfaktoren", a: document.getElementById('ref4').value},
+            {q: "Scheitern", a: document.getElementById('ref5').value}
+        ];
+
+        document.getElementById('loadingMsg').style.display = 'block';
+
+        // Daten an Google senden
+        await sendToGoogle(groupCode, scores, reflections);
+
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('quizArea').style.display = 'none';
+        document.getElementById('resultArea').style.display = 'block';
+        document.getElementById('sentSuccess').style.display = 'block';
+
+        renderChart(scores);
+        generateAnalysis(scores);
+        displayReflections(reflections);
+    }
+
+    async function sendToGoogle(code, scores, refs) {
+        const payload = {
+            groupCode: code,
+            ...scores,
+            ref1: refs[0].a, ref2: refs[1].a, ref3: refs[2].a, ref4: refs[3].a, ref5: refs[4].a
+        };
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.error("Übertragungsfehler", e);
+        }
+    }
+
+    function renderChart(scores) {
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        if(myChart) myChart.destroy();
+        const pts = Object.keys(scores).map(s => ({ x: styleMeta[s].x, y: styleMeta[s].y, r: scores[s]*4.5, label: s, score: scores[s] }));
+        myChart = new Chart(ctx, {
+            type: 'bubble',
+            data: { datasets: [{ data: pts, backgroundColor: pts.map(p => styleMeta[p.label].color + 'CC') }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { min: -1.2, max: 1.2, title: { display: true, text: '← UNABHÄNGIGKEIT | INTERDEPENDENZ →' } },
+                    y: { min: -1.2, max: 1.2, title: { display: true, text: '← STABILITÄT | FLEXIBILITÄT →' } }
+                },
+                plugins: { legend: { display: false } }
+            },
+            plugins: [{
+                afterDatasetsDraw(chart) {
+                    const {ctx} = chart;
+                    chart.data.datasets[0].data.forEach(p => {
+                        const x = chart.scales.x.getPixelForValue(p.x), y = chart.scales.y.getPixelForValue(p.y);
+                        ctx.fillStyle = styleMeta[p.label].color; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                        ctx.fillText(p.label, x, y - (p.r + 10));
+                    });
+                }
+            }]
+        });
+        const rnk = document.getElementById('ranking'); rnk.innerHTML = '';
+        Object.entries(scores).sort((a,b)=>b[1]-a[1]).forEach(([s,v]) => {
+            rnk.innerHTML += `<div class="ranking-item" style="background:${styleMeta[s].color}">${s} <span>${v}/10</span></div>`;
+        });
+    }
+
+    function generateAnalysis(scores) {
+        const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+        const t1 = sorted[0][0], t2 = sorted[1][0];
+        document.getElementById('analysisText').innerHTML = `<h3>Charakterisierung</h3><p>Dein Profil zeigt eine starke Ausprägung in <strong>${t1}</strong> und <strong>${t2}</strong>. In der Workshop-Diskussion werden wir sehen, wie sich dies mit der Wahrnehmung der anderen Teilnehmer deckt.</p>`;
+    }
+
+    function displayReflections(refs) {
+        const questionsDisplay = [
+            "Was schätzt du am meisten?",
+            "Was sollte entwickelt werden?",
+            "Führungsvorbild",
+            "Erfolgsmerkmale",
+            "Gründe für Misserfolg"
+        ];
+        const disp = document.getElementById('reflectionDisplay');
+        disp.innerHTML = refs.map((r, i) => `<div class="result-item"><span class="result-q">${questionsDisplay[i]}</span><div class="result-a">${r.a || 'Keine Antwort.'}</div></div>`).join('');
+    }
+</script>
+</body>
+</html>
