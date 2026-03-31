@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultur-Dashboard · SWISS Cockpit</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #0d1117;
+            --surface:   #161b22;
+            --surface2:  #1c2330;
+            --border:    rgba(255,255,255,0.07);
+            --accent:    #4f9cf9;
+            --accent2:   #f97c4f;
+            --text:      #e6edf3;
+            --muted:     #8b949e;
+            --ist-color: #4f9cf9;
+            --soll-color: #f97c4f;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        /* subtle grid bg */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(79,156,249,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(79,156,249,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative; z-index: 1;
+            max-width: 1160px;
+            margin: 0 auto;
+        }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .header-eyebrow {
+            font-size: 0.72em;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+        }
+        .header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--text);
+        }
+        .header h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+        .header-sub {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.95em;
+            font-weight: 300;
+        }
+
+        /* ── Setup card ── */
+        .setup-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 40px;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .setup-card label {
+            font-size: 0.85em;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        .setup-card input {
+            flex: 1;
+            min-width: 220px;
+            padding: 13px 18px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .setup-card input:focus { border-color: var(--accent); }
+        .setup-card input::placeholder { color: var(--muted); }
+        .btn-load {
+            padding: 13px 30px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+        .btn-load:hover { background: #3a88e8; }
+        .btn-load:active { transform: scale(0.98); }
+        .btn-load:disabled { background: var(--muted); cursor: not-allowed; }
+
+        /* ── Results ── */
+        #resultsGrid { display: none; }
+
+        .results-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+        .results-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8em;
+            font-weight: 400;
+        }
+        .count-badge {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-size: 0.82em;
+            color: var(--muted);
+        }
+        .count-badge strong { color: var(--accent); }
+
+        /* ── Legend ── */
+        .legend {
+            display: flex;
+            gap: 28px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 0.85em;
+            color: var(--muted);
+        }
+        .legend-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+        }
+        .legend-ring {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            border: 2.5px solid var(--soll-color);
+            background: transparent;
+        }
+
+        /* ── Chart card ── */
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+        }
+        .chart-wrapper { position: relative; height: 680px; }
+
+        /* ── Gap bars ── */
+        .gap-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 36px;
+            margin-bottom: 50px;
+        }
+        .gap-card h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.35em;
+            font-weight: 400;
+            margin-bottom: 28px;
+        }
+        .gap-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 80px;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .gap-label {
+            font-size: 0.88em;
+            font-weight: 500;
+            text-align: right;
+            color: var(--muted);
+        }
+        .gap-bar-track {
+            position: relative;
+            height: 10px;
+            background: var(--bg);
+            border-radius: 6px;
+            overflow: visible;
+        }
+        .gap-bar-soll {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            border-radius: 6px;
+            background: rgba(249,124,79,0.2);
+            border: 1px solid var(--soll-color);
+        }
+        .gap-bar-ist {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s cubic-bezier(.22,1,.36,1);
+        }
+        .gap-delta {
+            font-size: 0.82em;
+            font-weight: 600;
+            text-align: left;
+        }
+        .delta-pos { color: #4ade80; }
+        .delta-neg { color: #f87171; }
+        .delta-neu { color: var(--muted); }
+
+        /* ── Reflection ── */
+        .reflection-container { margin-top: 20px; }
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8em;
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+        .q-block {
+            margin-bottom: 32px;
+            border-left: 3px solid var(--accent);
+            background: var(--surface);
+            padding: 24px 28px;
+            border-radius: 0 12px 12px 0;
+        }
+        .q-title {
+            font-weight: 600;
+            font-size: 1em;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 16px;
+            letter-spacing: 0.02em;
+        }
+        .answer-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .answer-item {
+            padding: 14px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.88em;
+            color: #c9d1d9;
+            line-height: 1.55;
+            font-style: italic;
+        }
+
+        @media (max-width: 700px) {
+            .setup-card { flex-direction: column; align-items: stretch; }
+            .gap-row { grid-template-columns: 80px 1fr 60px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <div class="header-eyebrow">SWISS Cockpit Culture · Integrated Culture Framework</div>
+        <h1>Kultur-Dashboard <em>Aggregiert</em></h1>
+        <p class="header-sub">Kollektive Wahrnehmung im Vergleich zum angestrebten Soll-Profil (Workshop Dezember 2024)</p>
+    </header>
+
+    <div class="setup-card">
+        <label for="targetCode">Gruppen-Code</label>
+        <input type="text" id="targetCode" placeholder="z.B. Flottenseminar-April-2026">
+        <button class="btn-load" onclick="fetchGroupData()">Ergebnisse laden</button>
+    </div>
+
+    <div id="resultsGrid">
+        <div class="results-header">
+            <h2>Kulturelles Profil</h2>
+            <span class="count-badge"><strong id="countDisplay">0</strong> Antworten</span>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background: var(--ist-color); opacity: 0.75;"></div>
+                <span>IST – Gruppenwahrnehmung</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-ring"></div>
+                <span>SOLL – Angestrebtes Profil (Dez. 2024)</span>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-wrapper">
+                <canvas id="groupChart"></canvas>
+            </div>
+        </div>
+
+        <div class="gap-card">
+            <h3>IST–SOLL Vergleich</h3>
+            <div id="gapBars"></div>
+        </div>
+
+        <div class="reflection-container">
+            <h2 class="section-title">Stimmen aus der Gruppe</h2>
+            <div id="textResults"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let groupChart = null;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzORGnnRdcCoVnYQqFT4rN0JDT17IOc0bjkCX8ZoIXUF3vtKkqkIZ5fPg1wBOeT2vq9/exec";
+
+    // ── Soll-Profil (Ø 5 LLMs, Workshop Dez. 2024) ──
+    const SOLL = {
+        Caring:    6.5,
+        Purpose:   6.0,
+        Learning:  7.0,
+        Enjoyment: 2.0,
+        Results:   8.5,
+        Authority: 4.5,
+        Safety:    9.5,
+        Order:     9.0
+    };
+
+    const styleMeta = {
+        'Caring':    { x: 0.8,  y: 0.2,  color: '#27ae60' },
+        'Purpose':   { x: 0.5,  y: 0.8,  color: '#2ecc71' },
+        'Learning':  { x: -0.5, y: 0.8,  color: '#e67e22' },
+        'Enjoyment': { x: -0.8, y: 0.2,  color: '#f1c40f' },
+        'Results':   { x: -0.8, y: -0.2, color: '#e74c3c' },
+        'Authority': { x: -0.5, y: -0.8, color: '#8e44ad' },
+        'Safety':    { x: 0.5,  y: -0.8, color: '#3498db' },
+        'Order':     { x: 0.8,  y: -0.2, color: '#7f8c8d' }
+    };
+
+    async function fetchGroupData() {
+        const code = document.getElementById('targetCode').value.trim();
+        if (!code) return alert("Bitte gib den Gruppen-Code ein.");
+
+        const btn = document.querySelector('.btn-load');
+        btn.innerText = "Lädt…";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`${SCRIPT_URL}?code=${encodeURIComponent(code)}`);
+            const data = await response.json();
+
+            if (!data || data.length === 0) {
+                alert("Keine Daten für diesen Code. Bitte Groß-/Kleinschreibung prüfen.");
+                btn.innerText = "Ergebnisse laden";
+                btn.disabled = false;
+                return;
+            }
+
+            processData(data);
+            document.getElementById('resultsGrid').style.display = 'block';
+            btn.innerText = "Ergebnisse laden";
+            btn.disabled = false;
+        } catch (e) {
+            console.error(e);
+            alert("Fehler beim Abrufen der Daten.");
+            btn.innerText = "Ergebnisse laden";
+            btn.disabled = false;
+        }
+    }
+
+    function processData(rows) {
+        document.getElementById('countDisplay').innerText = rows.length;
+
+        const sums = { Caring:0, Purpose:0, Learning:0, Enjoyment:0, Results:0, Authority:0, Safety:0, Order:0 };
+        const keys = Object.keys(sums);
+
+        rows.forEach(row => {
+            keys.forEach((key, i) => {
+                sums[key] += parseFloat(row[i + 2] || 0);
+            });
+        });
+
+        const averages = {};
+        keys.forEach(k => averages[k] = sums[k] / rows.length);
+
+        renderGroupChart(averages);
+        renderGapBars(averages);
+
+        const questions = [
+            "Was schätzen die Teilnehmer am meisten?",
+            "Was sollte weiterentwickelt werden?",
+            "Wahrnehmung der Führungsvorbilder",
+            "Was macht in dieser Kultur erfolgreich?",
+            "Warum scheitern neue Mitarbeiter?"
+        ];
+
+        const textContainer = document.getElementById('textResults');
+        textContainer.innerHTML = '';
+        questions.forEach((q, qi) => {
+            const answers = rows.map(r => r[qi + 10]).filter(a => a && a.trim());
+            if (answers.length > 0) {
+                textContainer.innerHTML += `
+                    <div class="q-block">
+                        <span class="q-title">${q}</span>
+                        <div class="answer-list">
+                            ${answers.map(a => `<div class="answer-item">"${a}"</div>`).join('')}
+                        </div>
+                    </div>`;
+            }
+        });
+    }
+
+    function renderGroupChart(avgs) {
+        const ctx = document.getElementById('groupChart').getContext('2d');
+        if (groupChart) groupChart.destroy();
+
+        // IST bubbles
+        const istPts = Object.keys(avgs).map(s => ({
+            x: styleMeta[s].x,
+            y: styleMeta[s].y,
+            r: Math.max(avgs[s] * 5.5, 4),
+            label: s,
+            score: avgs[s].toFixed(1),
+            type: 'ist'
+        }));
+
+        // SOLL bubbles (hollow rings) – drawn as a second dataset
+        const sollPts = Object.keys(SOLL).map(s => ({
+            x: styleMeta[s].x,
+            y: styleMeta[s].y,
+            r: Math.max(SOLL[s] * 5.5, 4),
+            label: s,
+            score: SOLL[s].toFixed(1),
+            type: 'soll'
+        }));
+
+        const labelPlugin = {
+            afterDatasetsDraw(chart) {
+                const { ctx } = chart;
+                // Labels only for IST dataset (index 0)
+                chart.data.datasets[0].data.forEach(p => {
+                    const x = chart.scales.x.getPixelForValue(p.x);
+                    const y = chart.scales.y.getPixelForValue(p.y);
+                    ctx.save();
+                    ctx.fillStyle = '#e6edf3';
+                    ctx.font = 'bold 12px "DM Sans", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${p.label}`, x, y - (p.r + 10));
+                    ctx.restore();
+                });
+            }
+        };
+
+        groupChart = new Chart(ctx, {
+            type: 'bubble',
+            data: {
+                datasets: [
+                    {
+                        label: 'IST',
+                        data: istPts,
+                        backgroundColor: istPts.map(p => styleMeta[p.label].color + 'AA'),
+                        borderColor: istPts.map(p => styleMeta[p.label].color),
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'SOLL',
+                        data: sollPts,
+                        backgroundColor: 'transparent',
+                        borderColor: '#f97c4f',
+                        borderWidth: 2.5,
+                        borderDash: [5, 4]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        min: -1.3, max: 1.3,
+                        title: {
+                            display: true,
+                            text: '← UNABHÄNGIGKEIT          INTERDEPENDENZ →',
+                            color: '#8b949e',
+                            font: { size: 11, weight: '500', family: 'DM Sans' }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#8b949e' },
+                        border: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    y: {
+                        min: -1.3, max: 1.3,
+                        title: {
+                            display: true,
+                            text: '← STABILITÄT          FLEXIBILITÄT →',
+                            color: '#8b949e',
+                            font: { size: 11, weight: '500', family: 'DM Sans' }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#8b949e' },
+                        border: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1c2330',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        titleColor: '#e6edf3',
+                        bodyColor: '#8b949e',
+                        callbacks: {
+                            label: (c) => {
+                                const d = c.raw;
+                                const prefix = d.type === 'soll' ? 'SOLL' : 'IST';
+                                return `${prefix} ${d.label}: ${d.score} / 10`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [labelPlugin]
+        });
+    }
+
+    function renderGapBars(avgs) {
+        const container = document.getElementById('gapBars');
+        container.innerHTML = '';
+
+        const sorted = Object.keys(SOLL).sort((a, b) => SOLL[b] - SOLL[a]);
+        const max = 10;
+
+        sorted.forEach(style => {
+            const ist = avgs[style] || 0;
+            const soll = SOLL[style];
+            const delta = ist - soll;
+            const istPct = (ist / max * 100).toFixed(1);
+            const sollPct = (soll / max * 100).toFixed(1);
+
+            let deltaStr, deltaClass;
+            if (Math.abs(delta) < 0.3) {
+                deltaStr = '≈ 0';
+                deltaClass = 'delta-neu';
+            } else if (delta > 0) {
+                deltaStr = `+${delta.toFixed(1)}`;
+                deltaClass = 'delta-pos';
+            } else {
+                deltaStr = delta.toFixed(1);
+                deltaClass = 'delta-neg';
+            }
+
+            const istColor = styleMeta[style].color;
+
+            container.innerHTML += `
+                <div class="gap-row">
+                    <div class="gap-label">${style}</div>
+                    <div class="gap-bar-track">
+                        <div class="gap-bar-soll" style="width: ${sollPct}%"></div>
+                        <div class="gap-bar-ist" style="width: ${istPct}%; background: ${istColor}BB;"></div>
+                    </div>
+                    <div class="gap-delta ${deltaClass}">${deltaStr}</div>
+                </div>`;
+        });
+
+        // Legend below bars
+        container.innerHTML += `
+            <div style="margin-top: 20px; display: flex; gap: 24px; font-size: 0.8em; color: var(--muted);">
+                <span style="display:flex;align-items:center;gap:8px;">
+                    <span style="display:inline-block;width:16px;height:8px;background:rgba(249,124,79,0.2);border:1px solid #f97c4f;border-radius:3px;"></span>
+                    SOLL-Wert
+                </span>
+                <span style="display:flex;align-items:center;gap:8px;">
+                    <span style="display:inline-block;width:16px;height:8px;background:rgba(79,156,249,0.6);border-radius:3px;"></span>
+                    IST-Wert (Gruppenø)
+                </span>
+                <span style="display:flex;align-items:center;gap:8px; margin-left:auto;">
+                    Delta = IST − SOLL
+                </span>
+            </div>`;
+    }
+</script>
+</body>
+</html>
