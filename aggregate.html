@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultur-Check: Gruppen-Auswertung</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        h1 { color: #1a73e8; text-align: center; font-size: 2.2em; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        
+        .setup-box { background: #e8f0fe; padding: 25px; border-radius: 10px; margin-bottom: 40px; text-align: center; border: 1px solid #d2e3fc; }
+        input { padding: 12px; width: 350px; border-radius: 6px; border: 1px solid #bdc1c6; font-size: 1.1em; outline: none; }
+        button { padding: 12px 25px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.3s; }
+        button:hover { background: #1557b0; }
+        
+        #resultsGrid { display: none; }
+        .chart-wrapper { height: 650px; margin: 40px 0; position: relative; border: 1px solid #eee; border-radius: 8px; padding: 20px; }
+        
+        .reflection-container { margin-top: 60px; }
+        .q-block { margin-bottom: 40px; border-left: 6px solid #1a73e8; background: #f8f9fa; padding: 20px; border-radius: 0 8px 8px 0; }
+        .q-title { font-weight: bold; color: #1557b0; display: block; margin-bottom: 15px; font-size: 1.3em; }
+        .answer-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .answer-item { padding: 12px; background: white; border-radius: 6px; border: 1px solid #e0e0e0; font-style: italic; font-size: 0.95em; color: #444; box-shadow: 2px 2px 5px rgba(0,0,0,0.02); }
+
+        @media (max-width: 800px) { .answer-list { grid-template-columns: 1fr; } input { width: 80%; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kultur-Dashboard (Aggregiert)</h1>
+    <p class="subtitle">Analyse der kollektiven Wahrnehmung basierend auf dem Integrated Culture Framework</p>
+    
+    <div class="setup-box">
+        <strong>Gruppen-Code eingeben:</strong><br><br>
+        <input type="text" id="targetCode" placeholder="z.B. Test 1">
+        <button onclick="fetchGroupData()">Ergebnisse laden</button>
+    </div>
+
+    <div id="resultsGrid">
+        <h2 style="text-align: center;">Kulturelles Profil der Gruppe (<span id="countDisplay">0</span> Antworten)</h2>
+        <div class="chart-wrapper">
+            <canvas id="groupChart"></canvas>
+        </div>
+
+        <div class="reflection-container">
+            <h2>Qualitative Einblicke (Stimmen aus der Gruppe)</h2>
+            <div id="textResults"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let groupChart = null;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzORGnnRdcCoVnYQqFT4rN0JDT17IOc0bjkCX8ZoIXUF3vtKkqkIZ5fPg1wBOeT2vq9/exec";
+
+    const styleMeta = {
+        'Caring':   { x: 0.8, y: 0.2, color: '#27ae60' },
+        'Purpose':  { x: 0.5, y: 0.8, color: '#2ecc71' },
+        'Learning': { x: -0.5, y: 0.8, color: '#e67e22' },
+        'Enjoyment':{ x: -0.8, y: 0.2, color: '#f1c40f' },
+        'Results':  { x: -0.8, y: -0.2, color: '#e74c3c' },
+        'Authority':{ x: -0.5, y: -0.8, color: '#8e44ad' },
+        'Safety':   { x: 0.5, y: -0.8, color: '#3498db' },
+        'Order':    { x: 0.8, y: -0.2, color: '#7f8c8d' }
+    };
+
+    async function fetchGroupData() {
+        const code = document.getElementById('targetCode').value.trim();
+        if(!code) return alert("Bitte gib den Gruppen-Code ein.");
+
+        const btn = document.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "Lädt...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`${SCRIPT_URL}?code=${encodeURIComponent(code)}`);
+            const data = await response.json();
+            
+            if(!data || data.length === 0) {
+                alert("Keine Daten für diesen Code gefunden. Achte auf Groß-/Kleinschreibung.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+                return;
+            }
+
+            processData(data);
+            document.getElementById('resultsGrid').style.display = 'block';
+            btn.innerText = originalText;
+            btn.disabled = false;
+        } catch (e) {
+            console.error(e);
+            alert("Fehler beim Abrufen der Daten.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function processData(rows) {
+        document.getElementById('countDisplay').innerText = rows.length;
+
+        const sums = { Caring:0, Purpose:0, Learning:0, Enjoyment:0, Results:0, Authority:0, Safety:0, Order:0 };
+        const keys = Object.keys(sums);
+
+        rows.forEach(row => {
+            keys.forEach((key, index) => {
+                sums[key] += parseFloat(row[index + 2] || 0);
+            });
+        });
+
+        const averages = {};
+        keys.forEach(key => averages[key] = sums[key] / rows.length);
+
+        renderGroupChart(averages);
+
+        const questions = [
+            "Was schätzen die Teilnehmer am meisten?",
+            "Was sollte weiterentwickelt werden?",
+            "Wahrnehmung der Führungsvorbilder",
+            "Was macht in dieser Kultur erfolgreich?",
+            "Warum scheitern neue Mitarbeiter?"
+        ];
+        
+        const textContainer = document.getElementById('textResults');
+        textContainer.innerHTML = '';
+
+        questions.forEach((q, qIndex) => {
+            const answers = rows.map(row => row[qIndex + 10]).filter(a => a && a.trim() !== "");
+            if(answers.length > 0) {
+                textContainer.innerHTML += `
+                    <div class="q-block">
+                        <span class="q-title">${q}</span>
+                        <div class="answer-list">
+                            ${answers.map(a => `<div class="answer-item">"${a}"</div>`).join('')}
+                        </div>
+                    </div>`;
+            }
+        });
+    }
+
+    function renderGroupChart(avgs) {
+        const ctx = document.getElementById('groupChart').getContext('2d');
+        if(groupChart) groupChart.destroy();
+
+        const pts = Object.keys(avgs).map(s => ({
+            x: styleMeta[s].x, 
+            y: styleMeta[s].y, 
+            r: avgs[s] * 6,
+            label: s, 
+            score: avgs[s].toFixed(1)
+        }));
+
+        groupChart = new Chart(ctx, {
+            type: 'bubble',
+            data: { datasets: [{ data: pts, backgroundColor: pts.map(p => styleMeta[p.label].color + 'CC') }] },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        min: -1.2, max: 1.2, 
+                        title: { display: true, text: '← UNABHÄNGIGKEIT | INTERDEPENDENZ →', font: { weight: 'bold' } },
+                        grid: { color: '#e0e0e0' }
+                    },
+                    y: { 
+                        min: -1.2, max: 1.2, 
+                        title: { display: true, text: '← STABILITÄT | FLEXIBILITÄT →', font: { weight: 'bold' } },
+                        grid: { color: '#e0e0e0' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => `${c.raw.label}: Durchschn. ${c.raw.score}/10 Pkt.`
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                afterDatasetsDraw(chart) {
+                    const {ctx} = chart;
+                    chart.data.datasets[0].data.forEach(p => {
+                        const x = chart.scales.x.getPixelForValue(p.x), y = chart.scales.y.getPixelForValue(p.y);
+                        ctx.fillStyle = "#333"; 
+                        ctx.font = 'bold 14px Arial'; 
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${p.label} (${p.score})`, x, y - (p.r + 12));
+                    });
+                }
+            }]
+        });
+    }
+</script>
+</body>
+</html>
