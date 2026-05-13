@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>A320 Tasksharing Mobile</title>
+  <style>
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #121417;
+  --muted: #68707b;
+  --line: #d6dbe2;
+  --strong: #0b1721;
+  --accent: #006b5f;
+  --accent-2: #c9412f;
+  --warning: #e66a00;
+  --ok: #149000;
+  --blue: #5757ff;
+  --shadow: 0 10px 28px rgba(8, 18, 28, .08);
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--bg); }
+body {
+  min-height: 100%;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+button, select, input { font: inherit; }
+.app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+}
+header {
+  padding: 6px 2px 10px;
+}
+.kicker {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+h1 {
+  margin: 0;
+  color: var(--strong);
+  font-size: 28px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0 -12px 12px;
+  padding: 8px 12px 10px;
+  background: rgba(246, 247, 249, .94);
+  border-bottom: 1px solid rgba(214, 219, 226, .9);
+  backdrop-filter: blur(18px);
+}
+.control-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #e9edf2;
+}
+.segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.segmented span {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #3a424d;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+.segmented input:checked + span {
+  color: #fff;
+  background: var(--strong);
+  box-shadow: 0 2px 8px rgba(10, 20, 30, .16);
+}
+.select-wrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+.select-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+select {
+  width: 100%;
+  min-height: 46px;
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 42px 0 12px;
+  color: var(--ink);
+  background: #fff linear-gradient(45deg, transparent 50%, #5d6671 50%) right 18px center / 7px 7px no-repeat;
+  font-size: 16px;
+  font-weight: 800;
+}
+.status {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.status-main {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 850;
+  color: var(--strong);
+}
+.status-sub {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.reset-btn {
+  min-width: 44px;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--accent-2);
+  background: #fff;
+  font-weight: 900;
+}
+.section {
+  margin-top: 14px;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 18px 2px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.section-title::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+.item-card {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px 12px 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 1px 0 rgba(10, 20, 30, .04);
+}
+.item-card.done { opacity: .62; }
+.check {
+  width: 30px;
+  height: 30px;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+}
+.item-body { min-width: 0; }
+.note {
+  margin: 0 0 7px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 750;
+}
+.task-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(88px, 38%);
+  gap: 8px;
+  align-items: end;
+}
+.label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--strong);
+  font-size: 16px;
+  line-height: 1.18;
+  font-weight: 900;
+  letter-spacing: .015em;
+}
+.action {
+  color: var(--strong);
+  font-size: 14px;
+  line-height: 1.15;
+  text-align: right;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+.shared-pill, .role-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  margin: 0 0 7px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #eef5f4;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .05em;
+}
+.role-pill { background: #eef0f4; color: #44505d; }
+.text-block {
+  margin: 8px 0;
+  padding: 11px 12px;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: #fff;
+  color: var(--strong);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.empty {
+  margin-top: 22px;
+  padding: 22px 14px;
+  border: 1px dashed #b9c0ca;
+  border-radius: var(--radius);
+  color: var(--muted);
+  background: #fff;
+  text-align: center;
+  font-weight: 800;
+}
+.green { color: var(--ok); font-weight: 900; }
+.orange { color: var(--warning); font-weight: 900; }
+.blue { color: var(--blue); font-weight: 900; }
+u { text-underline-offset: 2px; }
+#source { display: none; }
+@media (max-width: 360px) {
+  .app { padding-left: 9px; padding-right: 9px; }
+  .controls { margin-left: -9px; margin-right: -9px; padding-left: 9px; padding-right: 9px; }
+  h1 { font-size: 25px; }
+  .label { font-size: 15px; }
+  .action { font-size: 13px; }
+}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <p class="kicker">A320 Normal Procedures</p>
+      <h1>Tasksharing</h1>
+    </header>
+
+    <section class="controls" aria-label="Filter">
+      <div class="control-row">
+        <div class="segmented" role="radiogroup" aria-label="Crew role">
+          <label><input type="radio" name="crewRole" value="CM1" checked><span>CM1</span></label>
+          <label><input type="radio" name="crewRole" value="CM2"><span>CM2</span></label>
+        </div>
+        <div class="segmented" role="radiogroup" aria-label="Flight function">
+          <label><input type="radio" name="flightFunction" value="PF" checked><span>PF</span></label>
+          <label><input type="radio" name="flightFunction" value="PM"><span>PM</span></label>
+        </div>
+      </div>
+      <label class="select-wrap">
+        <span class="select-label">Flugphase</span>
+        <select id="phaseSelect"></select>
+      </label>
+    </section>
+
+    <section class="status" aria-live="polite">
+      <div>
+        <div class="status-main" id="statusMain">Bereit</div>
+        <div class="status-sub" id="statusSub">Wähle Rolle, Funktion und Phase.</div>
+      </div>
+      <button class="reset-btn" id="resetPhase" type="button" aria-label="Diese Phase zurücksetzen">↺</button>
+    </section>
+
+    <main id="checklist" aria-live="polite"></main>
+  </div>
+
+  <template id="source">
+<main class="page"><h1>Safety Exterior Inspection</h1>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">WHEEL CHOCKS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">L/G DOORS</span><span class="dots"></span><span class="action">CHECK POSITION</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU AREA</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Preliminary Cockpit Preparation</h1>
+<div class="section-title ">Aircraft Setup</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">ENG 1, 2 MASTER LEVERS</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">NORM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*WEATHER RADAR</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*WINDSHEAR/PWS SW</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">L/G lever</span><span class="dots"></span><span class="action">DOWN</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">Both WIPER selectors</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+</tbody></table>
+<div class="section-title ">Batteries/External Power</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">BAT</span><span class="dots"></span><span class="action">CHECK/AUTO</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EXT PWR pb</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+</tbody></table>
+<div class="section-title ">APU Fire Test/APU Start</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">RMP 1 and 2</span><span class="dots"></span><span class="action">CHECK ON/SET</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ACP</span><span class="dots"></span><span class="action">CHECK ON/SET</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU FIRE TEST</span><span class="dots"></span><span class="action">PERFORM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU</span><span class="dots"></span><span class="action">START</span></div></td></tr>
+<tr><td></td><td><div class="wide-note">When the APU is AVAIL:</div><div class="item "><span class="label">AIR COND panel</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*EXT PWR pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+</tbody></table>
+<div class="section-title left">ADIRS</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">*ALL IR MODE selector</span><span class="dots"></span><span class="action">NAV</span></div></td></tr>
+</tbody></table>
+<div class="section-title ">Cockpit Lights</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">*COCKPIT LIGHTS</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">*COCKPIT LIGHTS</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+</tbody></table>
+<div class="section-title left">EFB/ACARS/AOC Initialization</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">All EFB</span><span class="dots"></span><span class="action">START</span></div></td><td><div class="item "><span class="label">All EFB</span><span class="dots"></span><span class="action">START</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EFB Version and Database</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">EFB Version and Database</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*ACARS/AOC</span><span class="dots"></span><span class="action">INITIALIZE</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note">For operations with the ACARS/AOC or the EFB, when a synchronization with the avionics is available:</div></td></tr>
+<tr><td><div class="wide-note"><u>FMGS PRE-INITIALIZATION</u></div><div class="item "><span class="label">*ENGINE & AIRCRAFT TYPE</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="wide-note"><u>FMGS PRE-INITIALIZATION</u></div><div class="item "><span class="label">*ENGINE & AIRCRAFT TYPE</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*DATABASE VALID</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">*DATABASE VALID</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*FLT NBR & FROM/TO</span><span class="dots"></span><span class="action">INSERT/CHECK</span></div></td><td><div class="item "><span class="label">*FLT NBR & FROM/TO</span><span class="dots"></span><span class="action">INSERT/CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*EFB</span><span class="dots"></span><span class="action">INITIALIZE</span></div></td><td><div class="item "><span class="label">*EFB</span><span class="dots"></span><span class="action">INITIALIZE</span></div></td></tr>
+</tbody></table>
+<div class="section-title left">Aircraft Acceptance</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">*RCL pb</span><span class="dots"></span><span class="action">PRESS 3 s</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">*LOGBOOK AND MEL/CDL ITEMS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">AIRCRAFT CONFIGURATION SUMMARY</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">*OEB</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*AIRCRAFT ACCEPTANCE</span><span class="dots"></span><span class="action">PERFORM</span></div></td><td></td></tr>
+</tbody></table>
+<div class="section-title left">Preliminary Performance Determination</div>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">*AIRFIELD DATA</span><span class="dots"></span><span class="action">OBTAIN</span></div></td><td><div class="item "><span class="label">*AIRFIELD DATA</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If an EFB application for load and trim sheet is used:</div></td></tr>
+<tr><td><div class="item "><span class="label">*PRELIMINARY LOADING</span><span class="dots"></span><span class="action">COMPUTE/CROSSCHECK</span></div></td><td><div class="item "><span class="label">*PRELIMINARY LOADING</span><span class="dots"></span><span class="action">COMPUTE/CROSSCHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*MEL/CDL ITEMS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">*MEL/CDL ITEMS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">*NAVIGATION CHARTS</span><span class="dots"></span><span class="action">PREPARE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*PRELIM T.O PERF DATA</span><span class="dots"></span><span class="action">COMPUTE</span></div></td><td><div class="item "><span class="label">*PRELIM T.O PERF DATA</span><span class="dots"></span><span class="action">COMPUTE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">*PRELIM T.O PERF DATA</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td></tr>
+</tbody></table>
+<div class="section-title left">Before Walkaround</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">*ECAM OXY PRESS/HYD QTY/ENG OIL QTY</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">FLAPS</span><span class="dots"></span><span class="action">CHECK POSITION</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*SPEED BRAKE lever</span><span class="dots"></span><span class="action">CHECK RET AND DISARMED</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*ACCU PRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*PARK BRK handle</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*BRAKES PRESS indicator</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ALTN BRAKING</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EMER EQPT</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">RAIN REPELLENT</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">C/B PANELS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*GEAR PINS</span><span class="dots"></span><span class="action">CHECK ONBOARD/STOWED</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*IF PFC NOT PERFORMED BY MAINTENANCE</span><span class="dots"></span><span class="action">PFC PERFORM</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Cockpit Preparation</h1>
+<div class="section-title left">Overhead Panel</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="wide-note">As a general rule, during the scan sequence:</div><div class="item "><span class="label">*All white lights (except MAINTENANCE panel)</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*RCDR GND CTL pb-sw</span><span class="dots"></span><span class="action">ON</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">CVR TEST pb</span><span class="dots"></span><span class="action">PRESS and MAINTAIN</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">CAPT & PURS/CAPT sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*SIGNS panel</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">PROBE/WINDOW HEAT pb-sw</span><span class="dots"></span><span class="action">AUTO</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">LDG ELEV</span><span class="dots"></span><span class="action">AUTO</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*PACK FLOW</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ELEC panel</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BAT</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*FUEL CTR TK MODE SEL pb-sw</span><span class="dots"></span><span class="action">CHECK AUTO</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ENG FIRE</span><span class="dots"></span><span class="action">CHECK/TEST</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">AUDIO SWITCHING</span><span class="dots"></span><span class="action">NORM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">CARGO AIR COND panel</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">PA (3rd occupant)</span><span class="dots"></span><span class="action">RECEPT</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">MAINT panel</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+</tbody></table>
+<div class="section-title left">CTR Instrument Panel</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">*ISIS/STBY INSTRUMENTS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*CLOCK</span><span class="dots"></span><span class="action">CHECK/SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*A/SKID & N/W STRG sw</span><span class="dots"></span><span class="action">ON</span></div></td><td></td></tr>
+</tbody></table>
+<div class="section-title left">Pedestal</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">RMP</span><span class="dots"></span><span class="action">CHECK ON/SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ACP</span><span class="dots"></span><span class="action">CHECK ON/SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*COCKPIT DOOR sw</span><span class="dots"></span><span class="action">NORM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">SWITCHING panel</span><span class="dots"></span><span class="action">NORM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*THRUST levers</span><span class="dots"></span><span class="action">IDLE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*ENG MASTER levers</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*ENG MODE selector</span><span class="dots"></span><span class="action">NORM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*ACCU PRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*PARK BRK handle</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*BRAKES PRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">GRAVITY GEAR EXTN</span><span class="dots"></span><span class="action">CHECK STOWED</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*ATC</span><span class="dots"></span><span class="action">STBY</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*TCAS</span><span class="dots"></span><span class="action">STBY</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ALT RPTG</span><span class="dots"></span><span class="action">ON</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*ATC SYS 1/2</span><span class="dots"></span><span class="action">SELECT</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*MSG RECORD (MCDU)</span><span class="dots"></span><span class="action">ERASE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*FMS</span><span class="dots"></span><span class="action">PREPARE</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*FMS PREPARATION</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">*EFB/MCDU GREEN DOT</span><span class="dots"></span><span class="action">COMPARE</span></div></td></tr>
+</tbody></table>
+<div class="section-title left">Glareshield</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td colspan="2"><div class="wide-note">When both flight crewmembers are seated:</div><div class="item "><span class="label">*BAROMETRIC REFERENCE</span><span class="dots"></span><span class="action">SET/CROSSCHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*FD</span><span class="dots"></span><span class="action">CHECK ON</span></div></td><td><div class="item "><span class="label">*FD</span><span class="dots"></span><span class="action">CHECK ON</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*ILS pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">*ILS pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*ND mode and range</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">*ND mode and range</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*ADF/VOR sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">*ADF/VOR sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*FCU</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+</tbody></table>
+<div class="section-title left">Lateral Console and PF/PM Instrument Panels</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">OXYGEN MASK</span><span class="dots"></span><span class="action">TEST</span></div></td><td><div class="item "><span class="label">OXYGEN MASK</span><span class="dots"></span><span class="action">TEST</span></div></td></tr>
+<tr><td><div class="item "><span class="label">PFD-ND brightness</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">PFD-ND brightness</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">LOUDSPEAKER knob</span><span class="dots"></span><span class="action">SET</span></div></td><td><div class="item "><span class="label">LOUDSPEAKER knob</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*PFD-ND</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">*PFD-ND</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*LDG ELEV (ECAM)</span><span class="dots"></span><span class="action">CHECK AUTO</span></div></td><td><div class="item "><span class="label">*IRS ALIGN</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">*ECAM STATUS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">*FOB</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">*FOB</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">*DEPARTURE BRIEFING</span><span class="dots"></span><span class="action">PERFORM</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">*COCKPIT PREPARATION C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Before Pushback or Start</h1>
+<div class="section-title left">Before Pushback/Start Clearance</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">FINAL LOADSHEET</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">FINAL LOADSHEET</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">ZFW/ZFWCG</span><span class="dots"></span><span class="action">CHECK/REVISE</span></div></td><td><div class="item "><span class="label">ZFW/ZFWCG</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">FUEL ON BOARD</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">FUEL ON BOARD</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If takeoff conditions changed:</div></td></tr>
+<tr><td><div class="item "><span class="label">FINAL T.O PERF DATA</span><span class="dots"></span><span class="action">RECOMPUTE</span></div><div class="item "><span class="label">FMS T.O DATA</span><span class="dots"></span><span class="action">REVISE</span></div></td><td><div class="item "><span class="label">FINAL T.O PERF DATA</span><span class="dots"></span><span class="action">RECOMPUTE</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">FMS REVISED TAKEOFF PERF DATA</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EFB/MCDU GREEN DOT</span><span class="dots"></span><span class="action">COMPARE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SEATING POSITION</span><span class="dots"></span><span class="action">ADJUST</span></div></td><td><div class="item "><span class="label">SEATING POSITION</span><span class="dots"></span><span class="action">ADJUST</span></div></td></tr>
+<tr><td><div class="item "><span class="label">HUD</span><span class="dots"></span><span class="action">DEPLOY/ADJUST</span></div></td><td><div class="item "><span class="label">HUD</span><span class="dots"></span><span class="action">DEPLOY/ADJUST</span></div></td></tr>
+<tr><td><div class="item "><span class="label">FMS PERF TO page</span><span class="dots"></span><span class="action">SELECT</span></div></td><td><div class="item "><span class="label">FMS F-PLN page</span><span class="dots"></span><span class="action">SELECT</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">AIR CONDITIONING UNITS</span><span class="dots"></span><span class="action">CHECK DISCONNECTED</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EXT PWR</span><span class="dots"></span><span class="action">CHECK <span class="green">AVAIL</span></span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EXT PWR DISCONNECTION</span><span class="dots"></span><span class="action">REQUEST</span></div></td></tr>
+</tbody></table>
+<div class="section-title left">At Pushback/Start Clearance</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">PUSHBACK/START CLEARANCE</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td><div class="item "><span class="label">BEACON sw</span><span class="dots"></span><span class="action">ON</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ATC</span><span class="dots"></span><span class="action">SET FOR OPERATION</span></div></td></tr>
+<tr><td><div class="item "><span class="label">WINDOWS/DOORS</span><span class="dots"></span><span class="action">CHECK CLOSED</span></div></td><td><div class="item "><span class="label">WINDOWS/DOORS</span><span class="dots"></span><span class="action">CHECK CLOSED</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SLIDES</span><span class="dots"></span><span class="action">CHECK ARMED</span></div></td><td><div class="item "><span class="label">SLIDES</span><span class="dots"></span><span class="action">CHECK ARMED</span></div></td></tr>
+<tr><td><div class="item "><span class="label">THRUST LEVERS</span><span class="dots"></span><span class="action">IDLE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ACCU PRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note">If pushback is not required:</div><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">ON</span></div><div class="item "><span class="label">BRAKES PRESS indicator</span><span class="dots"></span><span class="action">CHECK</span></div><div class="item "><span class="label">BEFORE START C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If pushback is required:</div><div class="item "><span class="label"><span class="green">NW STRG DISC</span> MEMO</span><span class="dots"></span><span class="action">CHECK DISPLAYED</span></div><div class="item "><span class="label">BEFORE START C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">OFF</span></div><div class="wide-note">When pushback is completed:</div><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">ON</span></div><div class="item "><span class="label">BRAKES PRESS indicator</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Engine Start</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">THRUST LEVERS</span><span class="dots"></span><span class="action">IDLE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">IGN/START</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ENGINE 1 START</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ENG 1 MASTER LEVER</span><span class="dots"></span><span class="action">ON</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ENG IDLE PARAMETERS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="wide-note">In the case of all engine taxi at departure:</div><strong>REPEAT THE START SEQUENCE FOR ENG 2</strong></td><td></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>After Start (All Engine Taxi at Departure)</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">NORM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td><div class="item "><span class="label">GND SPLRS</span><span class="dots"></span><span class="action">ARM</span></div></td></tr>
+<tr><td><div class="item "><span class="label">ANTI ICE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">RUD TRIM RESET pb</span><span class="dots"></span><span class="action">PRESS</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">RUD TRIM</span><span class="dots"></span><span class="action">CHECK NEUTRAL</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">FLAPS</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td><div class="wide-note">If the APU is not required:</div><div class="item "><span class="label">APU MASTER SW pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td><div class="item "><span class="label">PITCH TRIM wheel</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">ECAM STATUS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label"><span class="orange">NW STRG DISC</span> MEMO</span><span class="dots"></span><span class="action">CHECK NOT DISPLAYED</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">THRUST SETTING</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">CLEAR TO DISCONNECT</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">AFTER START C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>After Start (One Engine Taxi at Departure)</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">NORM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">YELLOW ELEC PUMP pb-sw</span><span class="dots"></span><span class="action">ON</span></div></td><td><div class="item "><span class="label">GND SPLRS</span><span class="dots"></span><span class="action">ARM</span></div></td></tr>
+<tr><td><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td><div class="item "><span class="label">RUD TRIM RESET pb</span><span class="dots"></span><span class="action">PRESS</span></div></td></tr>
+<tr><td><div class="item "><span class="label">ENG 1 ANTI ICE pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">RUD TRIM</span><span class="dots"></span><span class="action">CHECK NEUTRAL</span></div></td></tr>
+<tr><td><div class="item "><span class="label">APU MASTER SW pb-sw</span><span class="dots"></span><span class="action">KEEP ON</span></div></td><td><div class="item "><span class="label">FLAPS</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td><div class="item "><span class="label"><span class="orange">NW STRG DISC</span> MEMO</span><span class="dots"></span><span class="action">CHECK NOT DISPLAYED</span></div></td><td><div class="item "><span class="label">PITCH TRIM wheel</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td><div class="item "><span class="label">THRUST SETTING</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">CLEAR TO DISCONNECT</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td><td></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>All Engine Taxi at Departure</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">TAXI CLEARANCE</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BRAKES PRESSURE</span><span class="dots"></span><span class="action">CHECK AT ZERO</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BRAKES</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">BRK FAN pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BRAKES PRESSURE</span><span class="dots"></span><span class="action">CHECK AT ZERO</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">F/CTL</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ATC CLEARANCE</span><span class="dots"></span><span class="action">CONFIRM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">CLEARED ALTITUDE ON FCU</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">HDG ON FCU</span><span class="dots"></span><span class="action">IF REQUIRED, PRESET</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BOTH FD</span><span class="dots"></span><span class="action">CHECK ON</span></div></td></tr>
+<tr><td><div class="item "><span class="label">PFD/ND</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">PFD/ND</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">AUTO BRK MAX pb-sw</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td><div class="item "><span class="label">TERR ON ND</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">TERR ON ND</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ATC CODE/MODE</span><span class="dots"></span><span class="action">CONFIRM/SET FOR TAKEOFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">WEATHER RADAR</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">PREDICTIVE WINDSHEAR SYSTEM</span><span class="dots"></span><span class="action">AUTO</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">T.O CONFIG pb</span><span class="dots"></span><span class="action">TEST</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">T.O MEMO</span><span class="dots"></span><span class="action">CHECK NO BLUE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">CABIN REPORT</span><span class="dots"></span><span class="action">RECEIVE</span></div></td><td><div class="item "><span class="label">CABIN REPORT</span><span class="dots"></span><span class="action">RECEIVE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">TAXI C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>One Engine Taxi At Departure</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="wide-note">When the ground crew makes the hand signal:</div><div class="item "><span class="label">TAXI CLEARANCE</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BRAKES PRESSURE</span><span class="dots"></span><span class="action">CHECK AT ZERO</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BRAKES</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">BRK FAN pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BRAKES PRESSURE</span><span class="dots"></span><span class="action">CHECK AT ZERO</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ATC CLEARANCE</span><span class="dots"></span><span class="action">CONFIRM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">CLEARED ALTITUDE ON FCU</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">HDG ON FCU</span><span class="dots"></span><span class="action">IF REQUIRED, PRESET</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BOTH FD</span><span class="dots"></span><span class="action">CHECK ON</span></div></td></tr>
+<tr><td><div class="item "><span class="label">PFD/ND</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">PFD/ND</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="wide-note">When taxiing in a straight line:</div><div class="item "><span class="label">ENG 2 START</span><span class="dots"></span><span class="action">ORDER</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">YELLOW ELEC PUMP pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 2 THRUST LEVER</span><span class="dots"></span><span class="action">IDLE</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">IGN/START</span></div></td></tr>
+<tr><td></td><td><div class="wide-note">10 s after APU bleed ON:</div><div class="item "><span class="label">ENG 2 START</span><span class="dots"></span><span class="action">ANNOUNCE</span></div><div class="item "><span class="label">ENG 2 MASTER lever</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 2 IDLE PARAMETERS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">CHRONO</span><span class="dots"></span><span class="action">START</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">NORM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ANTI ICE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU MASTER SW pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">ECAM STATUS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">AFTER START C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">F/CTL</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">AUTO BRK MAX pb-sw</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td><div class="item "><span class="label">TERR ON ND</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">TERR ON ND</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">SQWK CODE/ATC MODE</span><span class="dots"></span><span class="action">CONFIRM/SET FOR TAKEOFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">WEATHER RADAR</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">PREDICTIVE WINDSHEAR SYSTEM</span><span class="dots"></span><span class="action">AUTO</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">T.O CONFIG pb</span><span class="dots"></span><span class="action">TEST</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">T.O MEMO</span><span class="dots"></span><span class="action">CHECK NO BLUE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">CABIN REPORT</span><span class="dots"></span><span class="action">RECEIVE</span></div></td><td><div class="item "><span class="label">CABIN REPORT</span><span class="dots"></span><span class="action">RECEIVE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">TAXI C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Before Takeoff</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="wide-note">If the Brake Fans are set to ON and the temperature of all brakes is below 150 °C:</div><div class="item "><span class="label">BRAKE FAN pb</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">LINE-UP CLEARANCE</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">TCAS</span><span class="dots"></span><span class="action">TA ONLY or TA/RA</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">TAKEOFF RUNWAY</span><span class="dots"></span><span class="action">CONFIRM</span></div></td></tr>
+<tr><td><div class="item "><span class="label">APPROACH PATH</span><span class="dots"></span><span class="action">CLEAR OF TRAFFIC</span></div></td><td><div class="item "><span class="label">APPROACH PATH</span><span class="dots"></span><span class="action">CLEAR OF TRAFFIC</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td><td><div class="item "><span class="label">PACK 1 and 2</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SLIDING TABLE</span><span class="dots"></span><span class="action">STOW</span></div></td><td><div class="item "><span class="label">SLIDING TABLE</span><span class="dots"></span><span class="action">STOW</span></div></td></tr>
+<tr><td><div class="item "><span class="label">All EFB TRANSMITTING MODE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">All EFB TRANSMITTING MODE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">All EFB (with no mounted equipment)</span><span class="dots"></span><span class="action">STOW</span></div></td><td><div class="item "><span class="label">All EFB (with no mounted equipment)</span><span class="dots"></span><span class="action">STOW</span></div></td></tr>
+<tr><td><div class="item "><span class="label">THRUST BUMP</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">CABIN CREW</span><span class="dots"></span><span class="action">ADVISE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">LINE UP C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Takeoff</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">TAKEOFF CLEARANCE</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">TAKEOFF</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">THRUST</span><span class="dots"></span><span class="action">50 % N1 (1.05 EPR)</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">SIDESTICK</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BRAKES</span><span class="dots"></span><span class="action">RELEASE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">THRUST levers</span><span class="dots"></span><span class="action">FLX or TOGA</span></div></td><td><div class="item "><span class="label">CHRONO</span><span class="dots"></span><span class="action">START</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note"><strong>The Captain places one hand on thrust levers until V1</strong></div></td></tr>
+<tr><td><div class="item "><span class="label">DIRECTIONAL CONTROL</span><span class="dots"></span><span class="action">USE RUDDER</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">PFD/ND</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">Below 80 kt:</div><div class="item "><span class="label">TAKEOFF THRUST</span><span class="dots"></span><span class="action">CHECK</span></div><div class="item "><span class="label">THRUST SET</span><span class="dots"></span><span class="action">ANNOUNCE</span></div><div class="item "><span class="label">PFD and ENG indications</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td><div class="wide-note">At 80 kt:</div><div class="item "><span class="label">SIDESTICK</span><span class="dots"></span><span class="action">RELEASE</span></div></td><td></td></tr>
+<tr><td><div class="wide-note">At 100 kt:</div><div class="item "><span class="label">100 kt</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td><td><div class="item "><span class="label">ONE HUNDRED KNOTS</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td></tr>
+<tr><td><div class="wide-note">At V1:</div></td><td><div class="item "><span class="label">V1</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td></tr>
+<tr><td><div class="wide-note">At VR:</div><div class="item "><span class="label">ROTATION</span><span class="dots"></span><span class="action">PERFORM</span></div></td><td><div class="item "><span class="label">ROTATION</span><span class="dots"></span><span class="action">ORDER</span></div></td></tr>
+<tr><td><div class="wide-note">When positive climb:</div><div class="item "><span class="label">L/G UP</span><span class="dots"></span><span class="action">ORDER</span></div><div class="item "><span class="label">AP</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">POSITIVE CLIMB</span><span class="dots"></span><span class="action">ANNOUNCE</span></div><div class="item "><span class="label">L/G lever</span><span class="dots"></span><span class="action">SELECT UP</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At the thrust reduction altitude:</div></td></tr>
+<tr><td><div class="item "><span class="label">THRUST levers</span><span class="dots"></span><span class="action">CL</span></div></td><td><div class="item "><span class="label">PACK 1 and 2 (if applicable)</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td><div class="wide-note">At F speed:</div><div class="item "><span class="label">FLAPS 1</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">FLAPS 1</span><span class="dots"></span><span class="action">SELECT</span></div></td></tr>
+<tr><td><div class="wide-note">At S speed:</div><div class="item "><span class="label">FLAPS 0</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">FLAPS 0</span><span class="dots"></span><span class="action">SELECT</span></div><div class="item "><span class="label">GND SPLRS</span><span class="dots"></span><span class="action">DISARM</span></div><div class="item "><span class="label">L/G</span><span class="dots"></span><span class="action">CHECK UP</span></div><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>After Takeoff</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="wide-note">If the APU was used to supply the air conditioning during takeoff:</div><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">OFF</span></div><div class="item "><span class="label">APU MASTER SW pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="wide-note">If the takeoff was performed with TA ONLY:</div><div class="item "><span class="label">TCAS</span><span class="dots"></span><span class="action">TA/RA</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 1 and 2 ANTI ICE pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Climb</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">MCDU</span><span class="dots"></span><span class="action">PERF CLB</span></div></td><td><div class="item "><span class="label">MCDU</span><span class="dots"></span><span class="action">F-PLN</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At transition altitude:</div><div class="item "><span class="label">BAROMETRIC REFERENCE</span><span class="dots"></span><span class="action">SET STD/CROSSCHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">CRZ FL</span><span class="dots"></span><span class="action">SET AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">WEATHER RADAR</span><span class="dots"></span><span class="action">ADJUST AS APPROPRIATE</span></div></td><td><div class="item "><span class="label">ENG 1 and 2 ANTI ICE pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At 10000 ft AAL:</div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">LAND sw</span><span class="dots"></span><span class="action">RETRACT</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">SEAT BELTS sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EFIS OPTIONS</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">EFIS OPTIONS</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ECAM MEMO</span><span class="dots"></span><span class="action">REVIEW</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">NAVAIDS</span><span class="dots"></span><span class="action">CLEAR</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">SEC F-PLN</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">OPT FL/REC MAX FL</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Cruise</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">ECAM MEMO/SD PAGES</span><span class="dots"></span><span class="action">REVIEW</span></div></td><td><div class="item "><span class="label">ECAM MEMO/SD PAGES</span><span class="dots"></span><span class="action">REVIEW</span></div></td></tr>
+<tr><td><div class="item "><span class="label">FLIGHT PROGRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">FLIGHT PROGRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">STEP FLIGHT LEVEL</span><span class="dots"></span><span class="action">AS APPROPRIATE</span></div></td><td><div class="item "><span class="label">STEP FLIGHT LEVEL</span><span class="dots"></span><span class="action">AS APPROPRIATE</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If <span class="orange">GPS PRIMARY LOST</span>:</div></td></tr>
+<tr><td><div class="item "><span class="label">NAVIGATION ACCURACY</span><span class="dots"></span><span class="action">MONITOR</span></div></td><td><div class="item "><span class="label">NAVIGATION ACCURACY</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td><div class="item "><span class="label">RADAR</span><span class="dots"></span><span class="action">ADJUST AS APPROPRIATE</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note">If the oxygen mask has been used:</div></td></tr>
+<tr><td><div class="item "><span class="label">OXYGEN MASK</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">OXYGEN MASK</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Descent Preparation</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="item "><span class="label">WEATHER AND LANDING INFORMATION</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">NAVIGATION CHARTS</span><span class="dots"></span><span class="action">PREPARE</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BAROMETRIC REFERENCE</span><span class="dots"></span><span class="action">PRESET</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">STATUS page</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">LANDING CONDITIONS</span><span class="dots"></span><span class="action">CONFIRM</span></div></td><td><div class="item "><span class="label">LANDING CONDITIONS</span><span class="dots"></span><span class="action">CONFIRM</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If landing conditions changed:</div></td></tr>
+<tr><td><div class="item "><span class="label">LANDING PERF DATA</span><span class="dots"></span><span class="action">COMPUTE</span></div></td><td><div class="item "><span class="label">LANDING PERF DATA</span><span class="dots"></span><span class="action">COMPUTE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">LANDING PERF DATA</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">FMS</span><span class="dots"></span><span class="action">PREPARE</span></div></td><td><div class="item "><span class="label">FMS PREPARATION</span><span class="dots"></span><span class="action">CROSSCHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">GPWS LDG FLAP 3</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">LDG ELEV</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">AUTO BRK</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">ARRIVAL BRIEFING</span><span class="dots"></span><span class="action">PERFORM</span></div></td></tr>
+<tr><td><div class="item "><span class="label">RADAR</span><span class="dots"></span><span class="action">ADJUST AS APPROPRIATE</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 1 and 2 ANTI ICE pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">DESCENT CLEARANCE</span><span class="dots"></span><span class="action">OBTAIN</span></div></td></tr>
+<tr><td><div class="item "><span class="label">CLEARED ALTITUDE ON FCU</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Descent</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">DESCENT</span><span class="dots"></span><span class="action">INITIATE</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">MCDU</span><span class="dots"></span><span class="action">PROG/PERF DESCENT</span></div></td><td><div class="item "><span class="label">MCDU</span><span class="dots"></span><span class="action">F-PLN</span></div></td></tr>
+<tr><td><div class="item "><span class="label">DESCENT</span><span class="dots"></span><span class="action">MONITOR/ADJUST</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">TERR ON ND</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">TERR ON ND</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">When the aircraft approaches the transition level, and when cleared for an altitude:</div><div class="item "><span class="label">BAROMETRIC REFERENCE</span><span class="dots"></span><span class="action">SET/CROSSCHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At 10000 ft AAL:</div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">LAND sw</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">SEAT BELTS sw</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EFIS option pb</span><span class="dots"></span><span class="action">CSTR</span></div></td><td><div class="item "><span class="label">EFIS option pb</span><span class="dots"></span><span class="action">CSTR</span></div></td></tr>
+<tr><td><div class="item "><span class="label">ILS pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">ILS pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">NAVAIDS</span><span class="dots"></span><span class="action">AS RQRD/CHECK</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note">If <span class="orange">GPS PRIMARY LOST</span>:</div></td></tr>
+<tr><td><div class="item "><span class="label">NAVIGATION ACCURACY</span><span class="dots"></span><span class="action">MONITOR</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">APPROACH C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Approach</h1>
+<div class="section-title left">Aircraft Configuration for Approach</div>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td colspan="2"><div class="wide-note"><u>Initial Approach</u></div></td></tr>
+<tr><td><div class="item "><span class="label">F-PLN SEQUENCING</span><span class="dots"></span><span class="action">ADJUST</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note">Approx 15 NM from touchdown:</div><div class="item "><span class="label">APPROACH PHASE</span><span class="dots"></span><span class="action">CHECK/ACTIVATE or set green dot <span class="blue">(1)</span></span></div></td></tr>
+<tr><td><div class="item "><span class="label">MANAGED SPEED</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">FLIGHT PATH</span><span class="dots"></span><span class="action">MONITOR</span></div></td><td><div class="item "><span class="label">NAV ACCURACY</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SPEED BRAKES lever</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">RADAR</span><span class="dots"></span><span class="action">ADJUST AS APPROPRIATE</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note"><u>Intermediate/Final approach</u></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At green dot:</div></td></tr>
+<tr><td><div class="item "><span class="label">FLAPS 1</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">FLAPS 1</span><span class="dots"></span><span class="action">SELECT</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">TCAS</span><span class="dots"></span><span class="action">TA or TA/RA</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">S SPEED</span><span class="dots"></span><span class="action">CHECK or SET <span class="blue">(1)</span></span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At 2000 ft AGL minimum:</div></td></tr>
+<tr><td><div class="item "><span class="label">FLAPS 2</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">FLAPS 2</span><span class="dots"></span><span class="action">SELECT</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">F SPEED</span><span class="dots"></span><span class="action">CHECK or SET <span class="blue">(1)</span></span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">When FLAPS 2:</div></td></tr>
+<tr><td><div class="item "><span class="label">L/G DOWN</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">L/G lever</span><span class="dots"></span><span class="action">SELECT DOWN</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">AUTO BRAKE</span><span class="dots"></span><span class="action">CONFIRM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">GND SPLRS</span><span class="dots"></span><span class="action">ARM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">When L/G down:</div></td></tr>
+<tr><td><div class="item "><span class="label">FLAPS 3</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">FLAPS 3</span><span class="dots"></span><span class="action">SELECT</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ECAM WHEEL PAGE</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">When FLAPS 3:</div></td></tr>
+<tr><td><div class="item "><span class="label">FLAPS FULL</span><span class="dots"></span><span class="action">ORDER</span></div></td><td><div class="item "><span class="label">FLAPS FULL</span><span class="dots"></span><span class="action">SELECT</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">SPEED TARGET</span><span class="dots"></span><span class="action">CHECK or SET <span class="blue">(1)</span></span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">A/THR</span><span class="dots"></span><span class="action">CHECK IN SPEED MODE or OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">WING A.ICE (if not required)</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SLIDING TABLE</span><span class="dots"></span><span class="action">STOW</span></div></td><td><div class="item "><span class="label">SLIDING TABLE</span><span class="dots"></span><span class="action">STOW</span></div></td></tr>
+<tr><td><div class="item "><span class="label">All EFB (with no mounted equipment)</span><span class="dots"></span><span class="action">STOW</span></div></td><td><div class="item "><span class="label">All EFB (with no mounted equipment)</span><span class="dots"></span><span class="action">STOW</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">LDG MEMO</span><span class="dots"></span><span class="action">CHECK NO BLUE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">CABIN REPORT</span><span class="dots"></span><span class="action">RECEIVE</span></div></td><td><div class="item "><span class="label">CABIN REPORT</span><span class="dots"></span><span class="action">RECEIVE</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">LANDING C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">CABIN CREW</span><span class="dots"></span><span class="action">ADVISE</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">FLIGHT PARAMETERS</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+</tbody></table>
+<p class="footnote">(1) PF if AP is ON, PM if AP is OFF. The PF may request that this action is performed by the PM depending on the situation.</p></main>
+<main class="page"><h1>Manual Landing</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">AP</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td colspan="2"><div class="wide-note">Around 30 ft RA:</div><div class="item "><span class="label">FLARE</span><span class="dots"></span><span class="action">PERFORM</span></div><div class="item "><span class="label">BOTH THRUST LEVERS</span><span class="dots"></span><span class="action">IDLE</span></div><div class="item "><span class="label">ATTITUDE</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At touchdown:</div><div class="item "><span class="label">DEROTATION</span><span class="dots"></span><span class="action">INITIATE</span></div><div class="item "><span class="label">BOTH REVERSER LEVERS</span><span class="dots"></span><span class="action">REV MAX or REV IDLE</span></div><div class="item "><span class="label">GND SPLRS</span><span class="dots"></span><span class="action">CHECK/ANNOUNCE</span></div><div class="item "><span class="label">REVERSERS</span><span class="dots"></span><span class="action">CHECK/ANNOUNCE</span></div><div class="item "><span class="label">DIRECTIONAL CONTROL</span><span class="dots"></span><span class="action">ENSURE</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If autobrake is selected:</div><div class="item "><span class="label">AUTO BRK</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">If landing without autobrake:</div><div class="item "><span class="label">BRAKES</span><span class="dots"></span><span class="action">AS RQRD</span></div><div class="item "><span class="label">DECELERATION</span><span class="dots"></span><span class="action">CHECK/ANNOUNCE</span></div></td></tr>
+<tr><td colspan="2"><div class="wide-note">At 70 kt:</div><div class="item "><span class="label">BOTH REVERSER LEVERS</span><span class="dots"></span><span class="action">IDLE</span></div><div class="item "><span class="label">SEVENTY KNOTS</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td></tr>
+<tr><td><div class="wide-note">At taxi speed:</div><div class="item "><span class="label">BOTH REVERSER LEVERS</span><span class="dots"></span><span class="action">STOW</span></div></td><td></td></tr>
+<tr><td><div class="wide-note">Before 20 kt:</div><div class="item "><span class="label">AUTO BRK</span><span class="dots"></span><span class="action">DISENGAGE</span></div></td><td></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>After Landing</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">GND SPLRS</span><span class="dots"></span><span class="action">DISARM</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">SET</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">RADAR</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">PREDICTIVE WINDSHEAR</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG MODE selector</span><span class="dots"></span><span class="action">NORM</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">FLAPS</span><span class="dots"></span><span class="action">RETRACT</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">TCAS</span><span class="dots"></span><span class="action">STBY</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ATC</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ANTI ICE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BRAKE TEMPERATURE</span><span class="dots"></span><span class="action">MONITOR</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BRK FAN pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">AFTER LANDING C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>One Engine Taxi At Arrival</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td></td><td><div class="wide-note">No less than 3 min after high thrust operations:</div><div class="item "><span class="label">COOLING TIME ELAPSED</span><span class="dots"></span><span class="action">ANNOUNCE</span></div></td></tr>
+<tr><td><div class="wide-note">When taxiing in a straight line:</div><div class="item "><span class="label">ENG 2 SHUTDOWN</span><span class="dots"></span><span class="action">ORDER</span></div></td><td></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU START pb-sw</span><span class="dots"></span><span class="action">CHECK <span class="green">AVAIL</span></span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 2 ANTI ICE pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 2 MASTER lever</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">ENG 2 PARAMETERS</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">YELLOW ELEC PUMP pb-sw</span><span class="dots"></span><span class="action">ON</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Parking</h1>
+<table class="checklist">
+<thead><tr><th>PF</th><th>PM</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">ACCU PRESS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td><div class="item "><span class="label">ANTI ICE</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">ON</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BRAKES PRESS indicator</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">YELLOW ELEC PUMP pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="wide-note">If the APU is not used:</div><div class="item "><span class="label">EXT PWR pb</span><span class="dots"></span><span class="action">CHECK <span class="green">AVAIL</span></span></div><div class="item "><span class="label">EXT PWR pb</span><span class="dots"></span><span class="action">ON</span></div><div class="wide-note">If the APU is used:</div><div class="item "><span class="label">APU START pb-sw</span><span class="dots"></span><span class="action">CHECK <span class="green">AVAIL</span></span></div></td><td><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">ALL ENG MASTER levers</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">ENGINE PARAMETERS</span><span class="dots"></span><span class="action">CHECK</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">WING sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">BEACON sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td></td></tr>
+<tr><td><div class="item "><span class="label">OTHER EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">FUEL PUMPS/CTR XFR VALVES</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SLIDES</span><span class="dots"></span><span class="action">CHECK DISARMED</span></div></td><td><div class="item "><span class="label">ATC</span><span class="dots"></span><span class="action">STBY</span></div></td></tr>
+<tr><td><div class="item "><span class="label">SEAT BELTS sw</span><span class="dots"></span><span class="action">OFF</span></div></td><td><div class="item "><span class="label">IRS PERFORMANCE</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">GROUND CONTACT</span><span class="dots"></span><span class="action">ESTABLISH</span></div></td><td><div class="item "><span class="label">FUEL QUANTITY</span><span class="dots"></span><span class="action">CHECK</span></div></td></tr>
+<tr><td><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">BRAKE FAN pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td colspan="2"><div class="item "><span class="label">PARKING C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">HUD</span><span class="dots"></span><span class="action">STOW</span></div></td><td><div class="item "><span class="label">HUD</span><span class="dots"></span><span class="action">STOW</span></div></td></tr>
+<tr><td><div class="item "><span class="label">STATUS page</span><span class="dots"></span><span class="action">CHECK (CM1)</span></div></td><td><div class="item "><span class="label">STATUS page</span><span class="dots"></span><span class="action">CHECK (CM1)</span></div></td></tr>
+<tr><td><div class="item "><span class="label">LOGBOOK</span><span class="dots"></span><span class="action">COMPLETE (CM1)</span></div></td><td><div class="item "><span class="label">LOGBOOK</span><span class="dots"></span><span class="action">COMPLETE (CM1)</span></div></td></tr>
+<tr><td><div class="item "><span class="label">All EFB TRANSMITTING MODE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">All EFB TRANSMITTING MODE</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EFB</span><span class="dots"></span><span class="action">CLOSE FLIGHT</span></div></td><td><div class="item "><span class="label">EFB</span><span class="dots"></span><span class="action">CLOSE FLIGHT</span></div></td></tr>
+<tr><td><div class="item "><span class="label">DUs</span><span class="dots"></span><span class="action">DIM</span></div></td><td><div class="item "><span class="label">DUs</span><span class="dots"></span><span class="action">DIM</span></div></td></tr>
+</tbody></table>
+</main>
+<main class="page"><h1>Securing the Aircraft</h1>
+<table class="checklist">
+<thead><tr><th>CM1</th><th>CM2</th></tr></thead>
+<tbody>
+<tr><td><div class="item "><span class="label">PARK BRK handle</span><span class="dots"></span><span class="action">AS RQRD</span></div></td><td><div class="item "><span class="label">OXYGEN CREW SUPPLY pb</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td><div class="item "><span class="label">All IR MODE selectors</span><span class="dots"></span><span class="action">OFF</span></div></td><td><div class="item "><span class="label">EXTERIOR LIGHTS</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">MAINT BUS sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU BLEED pb-sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EXT PWR pb</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">APU MASTER SW pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">EMER EXIT LT sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">SIGNS sw</span><span class="dots"></span><span class="action">OFF</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">BAT 1 pb-sw + BAT 2 pb-sw</span><span class="dots"></span><span class="action">AS RQRD</span></div></td></tr>
+<tr><td><div class="item "><span class="label">WINDOWS</span><span class="dots"></span><span class="action">CHECK CLOSED</span></div></td><td><div class="item "><span class="label">WINDOWS</span><span class="dots"></span><span class="action">CHECK CLOSED</span></div></td></tr>
+<tr><td></td><td><div class="item "><span class="label">SECURING THE AIRCRAFT C/L</span><span class="dots"></span><span class="action">COMPLETE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">EFB applications</span><span class="dots"></span><span class="action">CLOSE</span></div></td><td><div class="item "><span class="label">EFB applications</span><span class="dots"></span><span class="action">CLOSE</span></div></td></tr>
+<tr><td><div class="item "><span class="label">All EFB</span><span class="dots"></span><span class="action">SWITCH OFF</span></div></td><td><div class="item "><span class="label">All EFB</span><span class="dots"></span><span class="action">SWITCH OFF</span></div></td></tr>
+</tbody></table>
+</main>
+  </template>
+
+  <script>
+(() => {
+  const source = document.getElementById('source');
+  const phaseSelect = document.getElementById('phaseSelect');
+  const checklist = document.getElementById('checklist');
+  const statusMain = document.getElementById('statusMain');
+  const statusSub = document.getElementById('statusSub');
+  const resetPhase = document.getElementById('resetPhase');
+  const storagePrefix = 'a320-tasksharing-mobile-v1:';
+
+  const clean = (text) => text.replace(/\s+/g, ' ').trim();
+  const hash = (text) => {
+    let h = 5381;
+    for (let i = 0; i < text.length; i += 1) h = ((h << 5) + h) ^ text.charCodeAt(i);
+    return (h >>> 0).toString(36);
+  };
+  const readState = () => ({
+    crewRole: document.querySelector('input[name="crewRole"]:checked').value,
+    flightFunction: document.querySelector('input[name="flightFunction"]:checked').value,
+    phase: phaseSelect.value
+  });
+  const keyFor = (state, item) => storagePrefix + [state.crewRole, state.flightFunction, state.phase, item.id].join('|');
+
+  function extractItemsFromCell(cell, owner) {
+    const items = [];
+    const pendingNotes = [];
+    Array.from(cell.children).forEach((child) => {
+      if (child.classList.contains('wide-note') || child.classList.contains('note')) {
+        const note = clean(child.textContent);
+        if (note) pendingNotes.push(child.innerHTML.trim());
+        return;
+      }
+      if (child.classList.contains('item')) {
+        const label = child.querySelector('.label');
+        const action = child.querySelector('.action');
+        const labelText = label ? clean(label.textContent) : clean(child.textContent);
+        const actionText = action ? clean(action.textContent) : '';
+        items.push({
+          type: 'item',
+          owner,
+          notes: pendingNotes.splice(0),
+          label: label ? label.innerHTML.trim() : labelText,
+          action: action ? action.innerHTML.trim() : actionText,
+          textKey: clean([owner, labelText, actionText].join(' '))
+        });
+        return;
+      }
+      const text = clean(child.textContent);
+      if (text) {
+        items.push({ type: 'text', owner, notes: pendingNotes.splice(0), html: child.innerHTML.trim(), textKey: clean([owner, text].join(' ')) });
+      }
+    });
+    if (pendingNotes.length) {
+      pendingNotes.forEach((html) => items.push({ type: 'text', owner, notes: [], html, textKey: clean([owner, html].join(' ')) }));
+    }
+    return items;
+  }
+
+  function parseSource() {
+    return Array.from(source.content.querySelectorAll('main.page')).map((page, phaseIndex) => {
+      const title = clean(page.querySelector('h1')?.textContent || 'Phase ' + (phaseIndex + 1));
+      const blocks = [];
+      let currentSection = '';
+      Array.from(page.children).forEach((node) => {
+        if (node.matches?.('h1')) return;
+        if (node.classList?.contains('section-title')) {
+          currentSection = clean(node.textContent);
+          return;
+        }
+        if (!node.matches?.('table.checklist')) return;
+        const headers = Array.from(node.querySelectorAll('thead th')).map((th) => clean(th.textContent));
+        const axis = headers.includes('CM1') || headers.includes('CM2') ? 'crewRole' : 'flightFunction';
+        Array.from(node.querySelectorAll('tbody tr')).forEach((row, rowIndex) => {
+          const cells = Array.from(row.children);
+          cells.forEach((cell, cellIndex) => {
+            const shared = cell.colSpan === 2;
+            const owner = shared ? 'ALL' : headers[cellIndex];
+            const extracted = extractItemsFromCell(cell, owner);
+            extracted.forEach((entry, entryIndex) => {
+              const id = hash([title, currentSection, axis, rowIndex, cellIndex, entryIndex, entry.textKey].join('|'));
+              blocks.push({ ...entry, id, title, section: currentSection, axis, shared });
+            });
+          });
+        });
+      });
+      return { title, blocks };
+    });
+  }
+
+  const phases = parseSource();
+  phases.forEach((phase, index) => {
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = phase.title;
+    phaseSelect.appendChild(option);
+  });
+
+  function isRelevant(block, state) {
+    if (block.shared || block.owner === 'ALL') return true;
+    if (block.axis === 'crewRole') return block.owner === state.crewRole;
+    return block.owner === state.flightFunction;
+  }
+
+  function render() {
+    const state = readState();
+    const phase = phases[Number(state.phase)] || phases[0];
+    const relevant = phase.blocks.filter((block) => isRelevant(block, state));
+    checklist.innerHTML = '';
+    let currentSection = null;
+    let itemCount = 0;
+    let doneCount = 0;
+
+    relevant.forEach((block) => {
+      if (block.section !== currentSection) {
+        currentSection = block.section;
+        if (currentSection) {
+          const heading = document.createElement('div');
+          heading.className = 'section-title';
+          heading.textContent = currentSection;
+          checklist.appendChild(heading);
+        }
+      }
+
+      if (block.type === 'item') {
+        itemCount += 1;
+        const storageKey = keyFor(state, block);
+        const done = localStorage.getItem(storageKey) === '1';
+        if (done) doneCount += 1;
+        const label = document.createElement('label');
+        label.className = 'item-card' + (done ? ' done' : '');
+        label.innerHTML = '<input class="check" type="checkbox" ' + (done ? 'checked' : '') + ' aria-label="Punkt abhaken">' +
+          '<div class="item-body">' +
+          (block.shared ? '<span class="shared-pill">Shared</span>' : '<span class="role-pill">' + block.owner + '</span>') +
+          block.notes.map((note) => '<p class="note">' + note + '</p>').join('') +
+          '<div class="task-line"><div class="label">' + block.label + '</div><div class="action">' + block.action + '</div></div>' +
+          '</div>';
+        const checkbox = label.querySelector('input');
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) localStorage.setItem(storageKey, '1');
+          else localStorage.removeItem(storageKey);
+          render();
+        });
+        checklist.appendChild(label);
+        return;
+      }
+
+      const textBlock = document.createElement('div');
+      textBlock.className = 'text-block';
+      textBlock.innerHTML = block.notes.map((note) => '<p class="note">' + note + '</p>').join('') + block.html;
+      checklist.appendChild(textBlock);
+    });
+
+    if (!relevant.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'Für diese Auswahl sind in dieser Flugphase keine Punkte hinterlegt.';
+      checklist.appendChild(empty);
+    }
+
+    statusMain.textContent = state.crewRole + ' / ' + state.flightFunction + ' · ' + phase.title;
+    statusSub.textContent = itemCount ? doneCount + ' von ' + itemCount + ' Punkten erledigt' : 'Keine abhakbaren Punkte in dieser Auswahl';
+  }
+
+  function resetCurrentPhase() {
+    const state = readState();
+    const phase = phases[Number(state.phase)] || phases[0];
+    phase.blocks.filter((block) => block.type === 'item' && isRelevant(block, state)).forEach((block) => {
+      localStorage.removeItem(keyFor(state, block));
+    });
+    render();
+  }
+
+  document.querySelectorAll('input[name="crewRole"], input[name="flightFunction"]').forEach((input) => {
+    input.addEventListener('change', render);
+  });
+  phaseSelect.addEventListener('change', render);
+  resetPhase.addEventListener('click', resetCurrentPhase);
+  render();
+})();
+  </script>
+</body>
+</html>
