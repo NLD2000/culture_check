@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TPMS & Grading – LE Referenz und Tages-Checkliste</title>
+  <style>
+    :root{
+      --bg:#f6f7f9; --card:#ffffff; --text:#17202a; --muted:#5b6773; --line:#d8dee6;
+      --blue:#0f62fe; --blue2:#e8f1ff; --green:#198754; --orange:#b35c00; --red:#b00020;
+      --shadow:0 8px 24px rgba(20,35,55,.08); --radius:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.45}
+    header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+    .top{max-width:1180px;margin:0 auto;padding:14px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between}
+    .brand{display:flex;flex-direction:column;gap:2px}
+    h1{font-size:20px;margin:0;letter-spacing:-.02em}.sub{font-size:13px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;font-weight:650;cursor:pointer;color:var(--text)}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.warn{color:var(--red)}
+    main{max-width:1180px;margin:0 auto;padding:20px 18px 70px;display:grid;grid-template-columns:280px 1fr;gap:18px}
+    nav{position:sticky;top:80px;align-self:start;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+    nav a{display:block;text-decoration:none;color:var(--text);padding:9px 10px;border-radius:12px;font-size:14px} nav a:hover{background:var(--blue2)}
+    .progressBox{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.progressText{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .bar{height:10px;background:#edf1f5;border-radius:999px;overflow:hidden}.bar>span{display:block;height:100%;width:0;background:var(--green);transition:width .2s ease}
+    section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+    h2{font-size:22px;margin:0 0 14px;letter-spacing:-.02em} h3{font-size:17px;margin:18px 0 8px}.lead{font-size:16px;color:#243447}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.card.blue{background:var(--blue2);border-color:#b9d4ff}.card.green{background:#eaf7ef;border-color:#bfe5ca}.card.orange{background:#fff4e8;border-color:#ffd2a3}.card.red{background:#fff0f1;border-color:#ffc3ca}
+    .tag{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800;margin-right:4px;background:#eef2f6;color:#34495e}.tag.plus{background:#eaf7ef;color:var(--green)}.tag.minus{background:#fff0f1;color:var(--red)}.tag.no{background:#edf1f5;color:#5b6773}
+    ul{margin:8px 0 0;padding-left:20px}.checklist{display:grid;gap:8px;margin-top:10px}.check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--blue)}.check label{cursor:pointer;flex:1}.check small{display:block;color:var(--muted);margin-top:2px}
+    .decision{display:grid;gap:8px;margin-top:12px}.step{border-left:4px solid var(--blue);background:#f8fbff;border-radius:12px;padding:11px 12px}.step strong{display:block;margin-bottom:2px}
+    table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff} th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left} th{background:#f1f4f8;font-size:13px} tr:last-child td{border-bottom:0}
+    code,pre{font-family:var(--mono)} pre{white-space:pre-wrap;background:#111827;color:#f9fafb;border-radius:14px;padding:14px;overflow:auto}.note{border-left:4px solid var(--orange);background:#fff8f0;padding:12px 14px;border-radius:12px;color:#3b2b13}.danger{border-left:4px solid var(--red);background:#fff5f5;padding:12px 14px;border-radius:12px}.ok{border-left:4px solid var(--green);background:#f2fbf5;padding:12px 14px;border-radius:12px}
+    textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:14px;padding:12px;font-family:var(--sans);font-size:15px;resize:vertical;background:#fff}.tiny{font-size:12px;color:var(--muted)}
+    .footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}.printOnly{display:none}
+    @media (max-width: 860px){main{display:block;padding:14px 12px 60px}nav{position:static;margin-bottom:14px}.top{align-items:flex-start}.actions{justify-content:flex-end}.grid,.grid3{grid-template-columns:1fr}section{padding:18px}h1{font-size:18px}}
+    @media print{header,nav,.actions,.noPrint{display:none!important}body{background:#fff}main{display:block;max-width:none;padding:0}section{box-shadow:none;border:1px solid #bbb;break-inside:avoid;margin:0 0 12px;padding:14px}.printOnly{display:block}.check{padding:6px 8px}.check input{appearance:none;border:1px solid #333;width:12px;height:12px}textarea{border:1px solid #999;min-height:60px}a{color:#000;text-decoration:none}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand">
+      <h1>TPMS & Grading – Line Evaluation Referenz und Tages-Checkliste</h1>
+      <div class="sub">Fokus: praktische TPMS-Benutzung, Competency Assessment / Grading, OB-Entscheidungslogik, Finalise & Submit</div>
+    </div>
+    <div class="actions noPrint">
+      <button class="btn primary" onclick="window.print()">Drucken / PDF</button>
+      <button class="btn" onclick="expandAll()">Alles öffnen</button>
+      <button class="btn warn" onclick="resetAll()">Haken & Notizen zurücksetzen</button>
+    </div>
+  </div>
+</header>
+<main>
+  <nav class="noPrint">
+    <a href="#start">Start</a>
+    <a href="#tpms-vorher">1. Vor dem Event</a>
+    <a href="#waehrend">2. Während des Tages</a>
+    <a href="#grading">3. Grading Referenz</a>
+    <a href="#oblogik">4. OB: + / - / leer / N/O</a>
+    <a href="#person">5. Person Description</a>
+    <a href="#finalise">6. Finalise & Submit</a>
+    <a href="#debrief">7. Debriefing / PE-Eröffnung</a>
+    <a href="#notizen">8. Faktenteppich</a>
+    <div class="progressBox">
+      <div class="progressText"><span id="done">0</span>/<span id="total">0</span> erledigt</div>
+      <div class="bar"><span id="bar"></span></div>
+    </div>
+  </nav>
+
+  <div>
+    <section id="start">
+      <h2>Kurzübersicht</h2>
+      <p class="lead"><strong>Arbeitslogik:</strong> Template prüfen → Event durchführen und Faktenteppich führen → CCD/Debriefing → Grading & Personenbeschrieb finalisieren → Flight Log / Finalise Comment / Result prüfen → Complete → Submit → PE eröffnen & Acknowledge begleiten.</p>
+      <div class="grid3">
+        <div class="card blue"><strong>TPMS</strong><br>Richtiges LE-Template, UTC-Zeiten, Pending Events / Play Button, sauber speichern.</div>
+        <div class="card green"><strong>Grading</strong><br>Beobachtung → Prozess → Root Cause Kompetenz → relevante OBs → Grading.</div>
+        <div class="card orange"><strong>Finalise</strong><br>Keine violetten Felder, Personenbeschrieb, Result, Flight Log, Comment, Submit.</div>
+      </div>
+      <div class="note" style="margin-top:14px"><strong>Merksatz:</strong> Die PE darf vorbereitet werden; die finale Fassung sollte nach dem Debriefing kongruent zu CCD, Root-Cause-Kompetenz und THMs abgeschlossen werden.</div>
+    </section>
+
+    <section id="tpms-vorher">
+      <h2>1. Vor dem Event – TPMS Setup</h2>
+      <div class="checklist">
+        <div class="check"><input type="checkbox" id="c1"><label for="c1"><strong>TPMS Login getestet</strong><small>3/4-Letter-Code, Passwort, OTP bereit.</small></label></div>
+        <div class="check"><input type="checkbox" id="c2"><label for="c2"><strong>Browser bewusst gewählt</strong><small>Safari auf iPad bzw. Edge/Safari verwenden; keinen privaten/Inkognito-Modus nutzen, wenn lokal gespeichert werden soll.</small></label></div>
+        <div class="check"><input type="checkbox" id="c3"><label for="c3"><strong>Automatisches LE-Template in Pending Events geprüft</strong><small>Für Line Evaluation erstellt TPMS normalerweise ein Event Template mit Datum, Zeit, Legs und Trainee.</small></label></div>
+        <div class="check"><input type="checkbox" id="c4"><label for="c4"><strong>Rosterchange geprüft</strong><small>Bei kurzfristigem Rosterchange nur das neue Template benutzen; altes Template nicht verwenden.</small></label></div>
+        <div class="check"><input type="checkbox" id="c5"><label for="c5"><strong>Richtiges Template verifiziert</strong><small>LE/XLC: Line Evaluation Template; Single Crew oder Double Crew korrekt wählen. ILC ist Sonderfall über LIFUS Template.</small></label></div>
+        <div class="check"><input type="checkbox" id="c6"><label for="c6"><strong>Legs, Zeiten und Airports geprüft</strong><small>UTC-Zeiten, IATA-Airports, vollständige Rotation. Bei manuellem Template alle Legs korrekt erfassen.</small></label></div>
+        <div class="check"><input type="checkbox" id="c7"><label for="c7"><strong>PE über Pending Events / Play Button geöffnet</strong><small>Nicht über Event Templates eröffnen oder neu anlegen.</small></label></div>
+      </div>
+    </section>
+
+    <section id="waehrend">
+      <h2>2. Während des Tages – Speichern und Arbeiten</h2>
+      <div class="grid">
+        <div class="card"><h3>Offline / Cache</h3><ul><li>Schwarzer Hintergrund = PE lokal im Browser Cache gespeichert.</li><li><strong>Save</strong> speichert lokal im Browser Cache.</li><li>Cache nicht löschen, solange lokal offene Eingaben bestehen.</li></ul></div>
+        <div class="card"><h3>Server / Gerätewechsel</h3><ul><li><strong>Submit to Server</strong> speichert online und benötigt Internet.</li><li>Nach Server-Speicherung zum Weiterarbeiten wieder online öffnen.</li><li>Bei Gerätewechsel vorher auf Server speichern.</li></ul></div>
+      </div>
+      <div class="checklist">
+        <div class="check"><input type="checkbox" id="c8"><label for="c8"><strong>Faktenteppich parallel geführt</strong><small>Situation, beobachtbares Verhalten, Wirkung, Kompetenz, mögliche THM.</small></label></div>
+        <div class="check"><input type="checkbox" id="c9"><label for="c9"><strong>Zwischenspeicherung bewusst gemacht</strong><small>Lokal / Server klar unterschieden.</small></label></div>
+      </div>
+    </section>
+
+    <section id="grading">
+      <h2>3. Grading Referenz – Competency Assessment</h2>
+      <div class="ok"><strong>Grundprinzip:</strong> Das Grading orientiert sich an den Zielen des konkreten Events und dem geforderten Ausbildungsstand. Bewertet wird nicht abstrakt gegen einen sehr erfahrenen Piloten, sondern gegen die Anforderungen dieses Moduls / dieser Stufe.</div>
+      <h3>Grading-Prozess</h3>
+      <pre>Beobachtung aus Faktenteppich
+→ Prozess verstehen
+→ Root Cause / Kernkompetenz bestimmen
+→ relevante Observable Behaviours prüfen
+→ OBs markieren
+→ Kompetenzgrading ableiten
+→ im Debriefing / PE kongruent abbilden</pre>
+      <h3>Vier Prüfkriterien innerhalb einer Kompetenz</h3>
+      <table>
+        <tr><th>Kriterium</th><th>Leitfrage</th></tr>
+        <tr><td>Vollständigkeit</td><td>Wie viele relevante OBs habe ich in der Situation gesehen?</td></tr>
+        <tr><td>Regelmässigkeit</td><td>Wie oft wurde das relevante Verhalten über die Beobachtungsdauer gezeigt?</td></tr>
+        <tr><td>Qualität</td><td>Wie gut, präzise und wirksam wurde das Verhalten gezeigt?</td></tr>
+        <tr><td>TEM Process Outcome</td><td>Wie gut hat das Verhalten zum sicheren und effektiven TEM-/Operations-Outcome beigetragen?</td></tr>
+      </table>
+      <div class="note" style="margin-top:14px"><strong>Wichtig:</strong> In Ausbildungssituationen liegt der Fokus auf dem Prozess. Ein gutes Outcome kann einen fragilen Prozess nicht automatisch kompensieren; ein schwaches Outcome muss differenziert anhand des beobachteten Prozesses beurteilt werden.</div>
+      <div class="checklist">
+        <div class="check"><input type="checkbox" id="c10"><label for="c10"><strong>Alle Kompetenzen bewertet oder N/O gesetzt</strong><small>Keine Kompetenz einfach offen lassen.</small></label></div>
+        <div class="check"><input type="checkbox" id="c11"><label for="c11"><strong>Root Cause statt Mehrfachverteilung gewählt</strong><small>Wenn mehrere Kompetenzen möglich sind: Kernursache/Kernprozess herausarbeiten.</small></label></div>
+        <div class="check"><input type="checkbox" id="c12"><label for="c12"><strong>Grading über gesamte Beobachtungsdauer gewichtet</strong><small>Nicht vorschnell aus einem Einzelereignis ableiten.</small></label></div>
+      </div>
+    </section>
+
+    <section id="oblogik">
+      <h2>4. OB-Entscheidungslogik: + / - / leer / N/O</h2>
+      <div class="decision">
+        <div class="step"><strong>Schritt 1: War das OB in dieser konkreten Situation relevant?</strong> Nein → <span class="tag no">leer lassen</span>. Ja → weiter zu Schritt 2.</div>
+        <div class="step"><strong>Schritt 2: Wurde das erwartete Verhalten gezeigt?</strong> Ja → <span class="tag plus">+</span>. Nein → <span class="tag minus">-</span>.</div>
+        <div class="step"><strong>Schritt 3: Konnte ich überhaupt valide beobachten?</strong> Nein → Kompetenz/Bereich mit <span class="tag no">N/O</span> bewerten, wenn keine valide Aussage möglich ist.</div>
+      </div>
+      <h3>Praktische Merkhilfe</h3>
+      <table>
+        <tr><th>Auswahl</th><th>Bedeutung</th><th>Typische Frage</th></tr>
+        <tr><td><span class="tag plus">+</span></td><td>OB war required und wurde gezeigt.</td><td>War das Verhalten nötig und habe ich es beobachtet?</td></tr>
+        <tr><td><span class="tag minus">-</span></td><td>OB war required, wurde aber nicht gezeigt.</td><td>War das Verhalten nötig, blieb aber aus oder war nicht wirksam?</td></tr>
+        <tr><td><span class="tag no">leer</span></td><td>OB war in dieser Situation nicht required.</td><td>War dieses Verhalten hier überhaupt gefordert?</td></tr>
+        <tr><td><span class="tag no">N/O</span></td><td>Keine valide Beobachtung möglich / nicht beobachtet.</td><td>Kann ich hierzu überhaupt eine belastbare Aussage machen?</td></tr>
+      </table>
+      <div class="danger" style="margin-top:14px"><strong>Prüffrage vor jedem Minus:</strong> Kann ich konkret erklären, warum dieses OB in genau dieser Situation required war und was ich tatsächlich nicht gesehen habe?</div>
+    </section>
+
+    <section id="person">
+      <h2>5. Person Description</h2>
+      <p>Für alle TPMS PEs erforderlich. Der Personenbeschrieb soll ein situativ korrektes Gesamtbild geben und Aussagen zu den fünf Markern enthalten.</p>
+      <div class="grid">
+        <div class="card"><strong>Appearance</strong><br><textarea data-store="appearance" placeholder="Beobachtete Aussage zu Appearance..."></textarea></div>
+        <div class="card"><strong>Commitment</strong><br><textarea data-store="commitment" placeholder="Beobachtete Aussage zu Commitment..."></textarea></div>
+        <div class="card"><strong>Resilience</strong><br><textarea data-store="resilience" placeholder="Beobachtete Aussage zu Resilience..."></textarea></div>
+        <div class="card"><strong>Flexibility</strong><br><textarea data-store="flexibility" placeholder="Beobachtete Aussage zu Flexibility..."></textarea></div>
+        <div class="card"><strong>Reflection</strong><br><textarea data-store="reflection" placeholder="Beobachtete Aussage zu Reflection..."></textarea></div>
+        <div class="card orange"><strong>Nicht vergessen</strong><ul><li>Person Description nicht als Grundlage für «Not competent» verwenden.</li><li>Nur beobachtbare, angemessene Aussagen erfassen.</li></ul></div>
+      </div>
+      <div class="checklist">
+        <div class="check"><input type="checkbox" id="c13"><label for="c13"><strong>Alle fünf Person-Marker abgedeckt</strong><small>Appearance, Commitment, Resilience, Flexibility, Reflection.</small></label></div>
+      </div>
+    </section>
+
+    <section id="finalise">
+      <h2>6. Finalise & Submit</h2>
+      <div class="checklist">
+        <div class="check"><input type="checkbox" id="c14"><label for="c14"><strong>Keine violetten Quadrate offen</strong><small>Alle erforderlichen Felder / Gradings erledigt.</small></label></div>
+        <div class="check"><input type="checkbox" id="c15"><label for="c15"><strong>Gesamtresultat pro Trainee gesetzt</strong><small>Finalise-Seite ist jeweils Trainee-bezogen.</small></label></div>
+        <div class="check"><input type="checkbox" id="c16"><label for="c16"><strong>Flight Log erfasst</strong><small>PF, PM und Total Sectors eintragen.</small></label></div>
+        <div class="check"><input type="checkbox" id="c17"><label for="c17"><strong>Finalise Comment geschrieben</strong><small>Würdigende Beschreibung, relevante Informationen, Unregelmässigkeiten, Spezielles; keine Prosa-Zusammenfassung des Tickings.</small></label></div>
+        <div class="check"><input type="checkbox" id="c18"><label for="c18"><strong>Revalidation / Qualification geprüft</strong><small>Falls aktiviert: korrekt auf erfüllt / nicht erfüllt / nicht zutreffend setzen.</small></label></div>
+        <div class="check"><input type="checkbox" id="c19"><label for="c19"><strong>Bei Multicrew: beide Trainees vollständig</strong><small>Sonst kann keine der beiden PEs abgeschlossen werden.</small></label></div>
+        <div class="check"><input type="checkbox" id="c20"><label for="c20"><strong>Finalise → Complete geprüft</strong><small>Nach Finalise keine Änderungen mehr ohne Definalise.</small></label></div>
+        <div class="check"><input type="checkbox" id="c21"><label for="c21"><strong>Submit events to server erst nach finaler Prüfung</strong><small>Nach Submit auf Server ist die PE nicht mehr editierbar.</small></label></div>
+      </div>
+    </section>
+
+    <section id="debrief">
+      <h2>7. Debriefing / PE-Eröffnung / Acknowledge</h2>
+      <div class="grid">
+        <div class="card green"><strong>Vor Submit</strong><ul><li>PE muss kongruent zum Debriefing sein.</li><li>Keine neuen Themen in der PE.</li><li>Positive und Lernfelder faktenbasiert abbilden.</li></ul></div>
+        <div class="card blue"><strong>Nach Submit</strong><ul><li>Trainee sieht PE online im TPMS Portal.</li><li>Acknowledge begleiten.</li><li>Statement unmittelbar im Debriefing unter Anwesenheit ermöglichen, falls nötig.</li></ul></div>
+      </div>
+      <div class="checklist">
+        <div class="check"><input type="checkbox" id="c22"><label for="c22"><strong>PE im Debriefing eröffnet</strong><small>Trainee sichtet PE online.</small></label></div>
+        <div class="check"><input type="checkbox" id="c23"><label for="c23"><strong>Acknowledge / Statement Prozess abgeschlossen</strong><small>Bei Uneinigkeit Statement direkt begleiten.</small></label></div>
+      </div>
+    </section>
+
+    <section id="notizen">
+      <h2>8. Faktenteppich / Notizen</h2>
+      <p class="tiny">Diese Felder bleiben lokal im Browser gespeichert. Beim Zurücksetzen werden sie gelöscht.</p>
+      <div class="grid">
+        <div class="card"><strong>Key Events</strong><textarea data-store="keyevents" placeholder="Situation / Zeitpunkt / Kontext..."></textarea></div>
+        <div class="card"><strong>Positive Points</strong><textarea data-store="positive" placeholder="Was lief gut? Welche Kompetenz / OB? Warum war der Prozess gut?"></textarea></div>
+        <div class="card"><strong>Points to Improve</strong><textarea data-store="improve" placeholder="Was war das Lernfeld? Welche Root-Cause-Kompetenz?"></textarea></div>
+        <div class="card"><strong>THMs</strong><textarea data-store="thms" placeholder="Wenn..., dann..., damit..."></textarea></div>
+      </div>
+      <h3>Schreiblogik für PE-Kommentar</h3>
+      <pre>Beobachtung → Auswirkung → Kompetenz / OB → THM oder Empfehlung</pre>
+      <div class="footer">Persönliche Arbeitsreferenz. Basis: TPMS Guide, Line Evaluation / Grading Fokus. Stand der HTML-Erstellung: 04.06.2026 08:32</div>
+    </section>
+  </div>
+</main>
+<script>
+(function(){
+  const boxes=[...document.querySelectorAll('input[type="checkbox"]')];
+  const areas=[...document.querySelectorAll('textarea[data-store]')];
+  boxes.forEach(b=>{ const v=localStorage.getItem('tpms_'+b.id); if(v==='1') b.checked=true; b.addEventListener('change',()=>{localStorage.setItem('tpms_'+b.id,b.checked?'1':'0'); update();}); });
+  areas.forEach(a=>{ const k='tpms_text_'+a.dataset.store; const v=localStorage.getItem(k); if(v!==null) a.value=v; a.addEventListener('input',()=>localStorage.setItem(k,a.value)); });
+  window.update=function(){ const total=boxes.length, done=boxes.filter(b=>b.checked).length; document.getElementById('total').textContent=total; document.getElementById('done').textContent=done; document.getElementById('bar').style.width=(total?done/total*100:0)+'%'; }
+  window.resetAll=function(){ if(!confirm('Alle Haken und Notizen in dieser Datei zurücksetzen?')) return; boxes.forEach(b=>{b.checked=false; localStorage.removeItem('tpms_'+b.id)}); areas.forEach(a=>{a.value=''; localStorage.removeItem('tpms_text_'+a.dataset.store)}); update(); }
+  window.expandAll=function(){ document.querySelectorAll('details').forEach(d=>d.open=true); }
+  update();
+})();
+</script>
+</body>
+</html>

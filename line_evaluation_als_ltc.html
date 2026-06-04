@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Line Evaluation als LTC</title>
+  <style>
+    :root {
+      --text: #1f2933;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --soft: #f5f7fa;
+      --accent: #1f4e79;
+      --accent-soft: #eaf2f8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: #ffffff;
+      line-height: 1.35;
+      font-size: 13px;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid var(--accent);
+      font-size: 28px;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+
+    h2 {
+      margin: 18px 0 8px;
+      padding: 6px 9px;
+      font-size: 16px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-left: 5px solid var(--accent);
+    }
+
+    p {
+      margin: 6px 0;
+    }
+
+    strong {
+      color: #111827;
+    }
+
+    .lead {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .note {
+      padding: 8px 10px;
+      margin: 8px 0;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .compact {
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 10px;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 6px 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--soft);
+      color: #111827;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    td:first-child {
+      width: 22%;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .rules {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    .rules li {
+      margin: 2px 0;
+    }
+
+    .inline-list {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    code {
+      display: block;
+      margin: 7px 0;
+      padding: 7px 9px;
+      background: #f3f4f6;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      white-space: normal;
+    }
+
+    .questions {
+      columns: 2;
+      column-gap: 24px;
+      margin-top: 6px;
+    }
+
+    .questions li {
+      break-inside: avoid;
+      margin-bottom: 3px;
+    }
+
+    .footer-space {
+      height: 8px;
+    }
+
+    @media print {
+      body {
+        padding: 10mm;
+        font-size: 10.5px;
+        line-height: 1.25;
+      }
+
+      .page {
+        max-width: none;
+      }
+
+      h1 {
+        font-size: 22px;
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        font-size: 12.5px;
+        margin: 9px 0 4px;
+        padding: 4px 7px;
+      }
+
+      p {
+        margin: 3px 0;
+      }
+
+      table {
+        margin: 4px 0 6px;
+      }
+
+      th, td {
+        padding: 3.5px 5px;
+      }
+
+      .note {
+        padding: 5px 7px;
+        margin: 5px 0;
+      }
+
+      .rules li {
+        margin: 0;
+      }
+
+      .questions {
+        columns: 2;
+        margin-bottom: 0;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>Line Evaluation als LTC</h1>
+
+    <h2>1. Grundhaltung</h2>
+    <p class="lead"><strong>Reale Operation führen — nicht Prüfung inszenieren.</strong></p>
+    <p>Trainee arbeiten lassen, ruhig beobachten, dosiert eingreifen, faktenbasiert entlang der Pilot Competencies bewerten. Nicht Outcome bewerten, sondern <strong>Prozess und Ursache verstehen</strong>.</p>
+
+    <h2>2. Vor dem Flug — APROZ</h2>
+    <div class="note">
+      <strong>Ganz zu Beginn:</strong> Persönliche Ziele / THMs des Trainees abholen und <strong>CCD-Auftrag erteilen</strong>: Während des Events Schlüsselstellen / Weichenstellungen notieren, damit diese im Debriefing gezielt aufgegriffen werden können.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Schritt</th>
+          <th>Fokus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A Atmosphäre</td>
+          <td>Ruhiger, kollegialer, fokussierter Einstieg; Druck reduzieren; gemeinsamen Rahmen schaffen</td>
+        </tr>
+        <tr>
+          <td>P Prioritäten</td>
+          <td>Safety vor Operation vor Ausbildung; Jahresfokus mitdenken: Safety &amp; Efficiency, Speed Awareness, Stabilized Approach / Landing</td>
+        </tr>
+        <tr>
+          <td>R Rollen</td>
+          <td>PF und PM beobachten; Fokus auf Zusammenspiel, CRM, Schnittstellen und Entscheidungsprozesse</td>
+        </tr>
+        <tr>
+          <td>O Organisation</td>
+          <td>Leg-Verteilung, Notizen, Debriefing, Fragen und Umgang mit Ausbildungsthemen klären</td>
+        </tr>
+        <tr>
+          <td>Z Ziele</td>
+          <td>Persönliche Ziele / THMs bestätigen und für späteren Debriefing-Abgleich festhalten</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Merke:</strong> Wenn ich die persönlichen Ziele zu Beginn kenne, kann ich im Debriefing gezielt abgleichen: <strong>Was war das Ziel? Was wurde beobachtet? Was bedeutet das für die nächste THM?</strong></p>
+
+    <h2>3. Während des Fluges</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Bereich</th>
+          <th>Beobachtungsfokus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Operation</td>
+          <td>reale Abläufe, SOP, Prioritäten, Entscheidungsprozesse</td>
+        </tr>
+        <tr>
+          <td>Crew</td>
+          <td>PF/PM, CRM, Kommunikation, Schnittstellen</td>
+        </tr>
+        <tr>
+          <td>Flight Path</td>
+          <td>Automation, Energy, Stabilization, Monitoring</td>
+        </tr>
+        <tr>
+          <td>TEM</td>
+          <td>Threats, Errors, Recovery, Workload</td>
+        </tr>
+        <tr>
+          <td>Documentation</td>
+          <td>Route, Aerodrome, Operating Instructions</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Fokus auf Schlüsselstellen statt Chronologie:</strong> Welche Entscheidung, Priorisierung, Kommunikation oder Handlung hat den weiteren Verlauf geprägt?</p>
+    <p><strong>Intervention nur bei:</strong> <span class="inline-list">Safety · Ablaufgefährdung · Ausbildungsziel</span></p>
+    <code>Schlüsselstelle → Verhalten → Auswirkung → Root Cause Competence → Positiv / Improve → mögliche THM</code>
+
+    <h2>4. Kompetenzbrille</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Kompetenz</th>
+          <th>Kurzfokus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>KNO</td><td>Wissen, Systeme, OI, Route, Aerodrome</td></tr>
+        <tr><td>PRO</td><td>SOP, Procedures, Regulations</td></tr>
+        <tr><td>COM</td><td>klar, knapp, aktiv zuhören, eskalieren</td></tr>
+        <tr><td>FPA</td><td>Automation, Modes, Flight Path Monitoring</td></tr>
+        <tr><td>FPM</td><td>manuell fliegen, Accuracy, Energy, Tracking</td></tr>
+        <tr><td>LTW</td><td>Leadership, Teamwork, Verantwortung</td></tr>
+        <tr><td>PSD</td><td>Threats/Errors, Optionen, Entscheidungen</td></tr>
+        <tr><td>SAW</td><td>Aircraft, Systeme, Environment, Antizipation</td></tr>
+        <tr><td>WLM</td><td>Priorisieren, Delegieren, Cross-checking, Recovery</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. Debriefing — CCD führen</h2>
+    <div class="two-col">
+      <div>
+        <p><strong>Ablauf:</strong></p>
+        <ol class="rules">
+          <li>Ziele / persönliche THMs aufnehmen</li>
+          <li>Key Events / Schlüsselstellen sammeln</li>
+          <li>Positive Prozesse herausarbeiten</li>
+          <li>Points to Improve herausarbeiten</li>
+          <li>Root Cause Competence zuordnen</li>
+          <li>Positive THM formulieren</li>
+          <li>Improve THM formulieren</li>
+          <li>Klar abschliessen</li>
+        </ol>
+      </div>
+      <div>
+        <p><strong>Grundsatz:</strong> Positive Punkte nicht nur loben, sondern den zugrunde liegenden Prozess herausarbeiten: <strong>Was hat funktioniert? Warum hat es funktioniert? Wie wird es wiederholbar?</strong></p>
+        <p><strong>Eigene Positionierung kurz halten:</strong> Einverstanden · teilweise einverstanden · nicht einverstanden. Danach facilitated weiterarbeiten — nicht sofort werten, erklären oder dozieren.</p>
+      </div>
+    </div>
+
+    <p><strong>Gute Fragen:</strong></p>
+    <ul class="questions">
+      <li>«Was war heute der wichtigste Moment?»</li>
+      <li>«Wo wurde eine relevante Weiche gestellt?»</li>
+      <li>«Was hat gut funktioniert — und warum?»</li>
+      <li>«Was hat den Prozess erschwert?»</li>
+      <li>«Welche Kompetenz passt als Ursache dazu?»</li>
+      <li>«Was machst du nächstes Mal gleich?»</li>
+      <li>«Was machst du nächstes Mal anders?»</li>
+      <li>«Welche Wenn-Dann-THM nimmst du mit?»</li>
+    </ul>
+
+    <h2>6. THM-Qualität</h2>
+    <p>Eine gute THM ist <strong>konkret, prozessorientiert, sofort anwendbar, triggerbasiert</strong> und einer Kompetenz zuordenbar.</p>
+    <p><strong>THM möglichst durch den Trainee formulieren lassen.</strong> Ich führe über Fragen zur konkreten, triggerbasierten Handlung.</p>
+    <code>Wenn [Trigger], dann [konkrete Handlung], damit [gewünschter Effekt].</code>
+
+    <h2>7. PE / Abschluss</h2>
+    <div class="two-col">
+      <div>
+        <p><strong>Regeln:</strong></p>
+        <ul class="rules">
+          <li>Zuerst Debriefing-Agenda und Root Cause Competencies klären, dann PE finalisieren.</li>
+          <li>Der Report folgt dem Debriefing — nicht umgekehrt.</li>
+          <li>PE erst nach dem Debriefing finalisieren.</li>
+          <li>Keine Überraschungen.</li>
+          <li>Kongruent zum Debriefing.</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="rules">
+          <li>Faktenbasiert und kompetenzorientiert schreiben.</li>
+          <li>Positive Punkte und Lernfelder dokumentieren.</li>
+          <li>Lernfelder mit Beobachtungen belegen.</li>
+          <li>Task Monitoring nicht zum Debriefing-Thema machen.</li>
+        </ul>
+        <p><strong>Schreiblogik:</strong></p>
+        <code>Beobachtung → Auswirkung → Kompetenz → THM / Empfehlung</code>
+      </div>
+    </div>
+
+    <div class="footer-space"></div>
+  </main>
+</body>
+</html>
